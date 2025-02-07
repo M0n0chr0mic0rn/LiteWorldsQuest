@@ -1,0 +1,53 @@
+In der genesis.php werden globale Einstellung getätigt.
+In dieser Datei landet der User wenn er eine Anfrage an https://liteworlds.quest/ stellt.
+Anfragen an http://liteworlds.quest/ werden an https://liteworlds.quest/ weitergeleitet.
+
+1.
+header("Content-Security-Policy"):
+Diese Einstellung erlaubt keine Scriptaufrufe von außerhalb.
+
+2.
+Globale Funktionen
+Diverese Funktionen welche das $RETURN Objekt betrifft.
+
+
+An dieser Stelle erfolgt eine Prüfung der URL
+
+3a -> das Schlüsselwort "method" wurde als Parameter nicht angegeben.
+3b -> das Schlüsselwort "method" wurde als Parameter angegeben.
+
+
+3a.
+An dieser Stelle erfolgt eine Prüfung der URL
+
+3a-1 -> das Schlüsselwort "info" wurde als Parameter nicht angegeben.
+3a-2 -> das Schlüsselwort "info" wurde als Parameter angegeben.
+
+3a-1.
+Die Datei genesis.html wird eingebunden -> Start der eigentlichen Website
+
+3a-2.
+Anhand der eingabe zu "info" wird eine Infoseite angeziegt.
+
+3b.
+Start der API
+- aktiviere Fehlerausgabe
+- setzte den Content Typ auf JSON
+- erlaube Zugriff aus allen Quellen
+
+Erstellung des $RETURN Objekts
+- response: array: Zeigt Schrittweiße den Ablauf
+- error: string: Enthält den Fehler wenn vorhanden
+- bool: bool: Anzeige für (miss)erfolgreiche Anfrage
+- ip: string: Die IP des Users
+
+Abrufen der Klassen
+- user: Enthält alle nötigen Funktionen für den User
+- openode: (OpenNode) Enthält alle Funktionen für öffentliche/nicht wallet spezifische Anfragen
+
+Erstellen der Klassenobjekte
+- $USER
+- $OPENODE
+
+Einbinden der Endpunkte
+

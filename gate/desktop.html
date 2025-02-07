@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LiteWorldsQuest</title>
+
+    <link rel="stylesheet" href="Styles/desktop.css">
+    <link rel="stylesheet" href="Styles/scrollbars.css">
+    <link rel="stylesheet" href="Styles/mask.css">
+    <link rel="stylesheet" href="Styles/buttons.css">
+    <link rel="stylesheet" href="Styles/katana.css">
+    <link rel="stylesheet" href="Styles/nftCard.css">
+    <link rel="stylesheet" href="Styles/campfire.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+    <script src="JavaScript/genesis.js" defer></script>
+    <script src="JavaScript/mask.js" defer></script>
+    <script src="JavaScript/telegram.js" defer></script>
+    <script src="JavaScript/menu.js" defer></script>
+    <script src="JavaScript/dex.js" defer></script>
+    <script src="JavaScript/traderbot.js" defer></script>
+    <script src="JavaScript/login.js" defer></script>
+    <script src="JavaScript/settings.js" defer></script>
+    <script src="JavaScript/litecoin.js" defer></script>
+    <script src="JavaScript/omnilite.js" defer></script>
+    <script src="JavaScript/ordinal.js" defer></script>
+    <script src="JavaScript/newaddress.js" defer></script>
+</head>
+<body>
+    <header class="navbar">
+        <span id="HEADlogo" class="site-name">LiteWorldsQuest</span>
+
+        <nav id="menu">
+            <div class="dropdown">
+                <button class="dropdown-btn">Main</button>
+                <div class="dropdown-content">
+                    <button class="dropdown-item" onclick="MENUchange('home')">Home</button>
+                    <button class="dropdown-item" onclick="Mask('login')">Login</button>
+                    <button class="dropdown-item" onclick="Mask('signup')">SignUp</button>
+                    <button class="dropdown-item" style="display: none;" onclick="MENUchange('settings')">Settings</button>
+                    <button class="dropdown-item" style="display: none;" onclick="Logout()">Logout</button>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Litecoin</button>
+                <div class="dropdown-content">
+                    <button class="dropdown-item" onclick="MENUchange('info-litecoin')">Info</button>
+                    <button class="dropdown-item" style="display: none;" onclick="MENUchange('litecoin')">Wallet</button>
+                    <button class="dropdown-item" style="display: none;">Omnilite</button>
+                    <button class="dropdown-item" style="display: none;">DEX</button>
+                    <button class="dropdown-item" style="display: none;">NFTraderBot</button>
+                    <button class="dropdown-item" style="display: none;">Ordinals</button>
+                    <button class="dropdown-item" style="display: none;">Runes</button>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropdown-btn">Kotia</button>
+                <div class="dropdown-content">
+                    <button class="dropdown-item" onclick="MENUchange('info-kotia')">Info</button>
+                    <button class="dropdown-item" style="display: none;">Wallet</button>
+                </div>
+            </div>
+            <div class="dropdown" style="display: none;">
+                <button class="dropdown-btn">DevGround</button>
+                <div class="dropdown-content">
+                    <button class="dropdown-item" onclick="MENUchange('info-devground')">Info</button>
+                    <button class="dropdown-item" style="display: none;">?FairBrix</button>
+                    <button class="dropdown-item" style="display: none;">?Ads</button>
+                    <button class="dropdown-item" style="display: none;">?RPG</button>
+                    <button class="dropdown-item" style="display: none;">?Monos</button>
+                    <button class="dropdown-item" style="display: none;">?Cluck</button>
+                    <button class="dropdown-item" style="display: none;">?Raffle</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    
+    <main>
+        <section id="home">
+            <div class="main-div"><h2 class="main-div-headline">Omnilite DEX</h2></div>
+            <div class="main-div">
+                <h2 class="main-div-headline">Welcome Chikun</h2>
+
+                <p id="homeTerminal">
+                    This Website is designed with Firefox on Linux Mint in HD(1920x1080px), diplay issues may occure on other Browsers, Resolutions or Operating Systems.<br><br>
+                    We are able to handle Litecoin which is a commodity.<br><br>
+                    Due to costs associated with using the Litecoin Blockchain we also use the Kotia Blockchain to avoid this.<br><br>
+                    Since both chains are very similar, methods can be tested cost-effectively on Kotia and later integrated or adapted to Litecoin.<br><br>
+                    There is no exchange between Litecoin and Kotia offered on LiteWorlds.Quest.
+                    Please use an available exchanges for this.<br><br>
+                    Working exchange options between Litecoin and Litecoin-Assets (Omnilite/Ordinals/Runes) are for illustrative purposes only.<br><br>
+                    More Information about both Projects can be found on their Websites. Links in Menu.<br>
+                </p>
+            </div>
+            <div class="main-div"><h2 class="main-div-headline">OmniNFTraderBot</h2></div>
+        </section>
+
+        <section id="settings">
+            <div class="main-div"></div>
+            <div class="main-div"></div>
+            <div class="main-div"></div>
+        </section>
+
+        <section id="litecoin-wallet">
+            <div class="main-div"></div>
+            <div class="main-div"></div>
+            <div class="main-div"></div>
+        </section>
+
+        <section id="litecoin-omnilite">
+            
+        </section>
+
+        <div id="MASKnewaddress" class="mask">
+            <select name="type" id="newaddresstype">
+                <option value="bech32">segwit - ltc1x</option>
+                <option value="p2sh-segwit">omnilite - Mx</option>
+                <option value="legacy">legacy - Lx</option>
+            </select>
+            <label for="newaddresslabel">label (empty for default)</label>
+            <input type="text" id="newaddresslabel" name="newaddresslabel" style="margin-top: 9px;">
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="LitecoinNewAddress()">Create</button>
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('newaddress')">Close Mask</button>
+        </div>
+
+        <div id="MASKsignup" class="mask">
+            <h2>Sign Up</h2>
+            <label for="2fatype">2FA Type
+                <select name="2fatype" id="2fatype">
+                    <option value="email">Email</option>
+                    <option value="telegram">Telegram</option>
+                </select></label>
+            <label for="regemail" id="regemail">Email
+                <input type="email" name="regemail" style="margin-top: 9px;"></label>
+            <label for="regtelegram" id="regtelegram" style="display: none;">Telegram handle<br>(start and/or write a message to the Bot in Telegram before you sign up @LWQtestBot)
+                <input type="text" name="regtelegram" style="margin-top: 9px;"></label>
+            <label for="reguser" id="reguser">Username (6-18 characters, a-z and/or 0-9. no special characters)
+                <input type="text" name="reguser" style="margin-top: 9px;"></label>
+            <label for="regpass" id="regpass">Password
+                <input type="password" name="regpass" style="margin-top: 9px;"></label>
+            <label for="regpass1" id="regpass1">repeat Password
+                <input type="password" name="regpass1" style="margin-top: 9px;"></label>
+
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="SignUp()">Sign Up</button>
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('signup')">Close Mask</button>
+        </div>
+
+        <div id="MASKlogin" class="mask">
+            <h2>Login</h2>
+            <label for="loginuser" >Username
+                <input type="text" id="loginuser" name="loginuser" style="margin-top: 9px;"></label>
+            <label for="loginpass">Password
+                <input type="password" id="loginpass" name="loginpass" style="margin-top: 9px;"></label>
+
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="Login()">Login</button>
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('login')">Close Mask</button>
+        </div>
+        
+        <div id="campfire" class="campfireContainer">
+            <div class="campfire"></div>
+        </div>
+
+        <div id="terminal">
+            <div id="terminal-content">
+                Hallo
+            </div>
+        </div>
+    </main>
+</body>
+</html>
