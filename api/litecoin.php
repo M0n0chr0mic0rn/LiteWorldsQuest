@@ -6,7 +6,7 @@ class Litecoin
     private static $_ServiceFeeFaucet = "MCtYmUDUvjCatos2whjAsPaBr2a1nwA1tG";
 
     private static $_minSendingAmount = 0.00006;
-    private static $_ServiceFee = 0.00025;
+    private static $_ServiceFee = "0.00025";
 
     private function _ServiceFeeDestination()
     {
@@ -22,6 +22,71 @@ class Litecoin
         $tx = json_decode($r);
         $fee = $tx->vsize * 3;
         return $fee;
+    }
+
+    private function _BuildInputA($RETURN)
+    {
+        $utxos = json_decode(Node($RETURN, "listunspent", [0,999999999,[$RETURN->send["origin"]]], $RETURN->user["name"]));
+
+        $amount2send = 0;
+        $input = array();
+        $index = 0;
+        do
+        {
+            array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
+            $amount2send += $utxos[$index]->amount;
+            $index++;
+
+            if ($index == count($utxos)) break;
+        }
+        while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee));
+
+        if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee)) Fail($RETURN, "collide at dust amount");
+
+        $RETURN->send["liquidity"] = $amount2send;
+        return $input;
+    }
+
+    private function _BuildOutputA($RETURN, $input, $output)
+    {
+        //var_dump($input);
+        //var_dump($output);
+
+        $txhex = Node($RETURN, "createrawtransaction", [$input, $output], $RETURN->user["name"]);
+        $txhex = str_replace("\"","", $txhex);
+        //var_dump($txhex);
+
+        $r = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$txhex], $RETURN->user["name"]));
+        if ($r->complete)
+        {
+            //var_dump($r->hex);
+
+            $networkfee = self::_Weight($RETURN, $r->hex) / 100000000;
+            $output[$RETURN->send["origin"]] = (float)$output[$RETURN->send["origin"]] - $networkfee;
+
+            if ($output[$RETURN->send["origin"]] < self::$_minSendingAmount) Fail($RETURN, "dust error");
+            $output[$RETURN->send["origin"]] = number_format($output[$RETURN->send["origin"]], 8, ".", "");
+
+            $RETURN->send["dc"] = 0;
+            foreach ($output as $key => $value)
+            {
+                $RETURN->send["dc"] += (float)$value;
+            }
+
+            $RETURN->send["dc"] = (float)number_format($RETURN->send["dc"], 8, ".", "");
+            var_dump($RETURN->send);
+
+            $txhex = Node($RETURN, "createrawtransaction", [$input, $output], $RETURN->user["name"]);
+            $txhex = str_replace("\"","", $txhex);
+
+            $r = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$txhex], $RETURN->user["name"]));
+            if ($r->complete)
+            {
+                //var_dump($r->hex);
+
+                return $r->hex;
+            }
+        }
     }
 
     function __construct()
@@ -93,17 +158,40 @@ class Litecoin
 
     function NewAddress($RETURN, $label, $type)
     {
+        var_dump($label, $type);
         //$r = Node($RETURN, "getnewaddress", [$label, $type], $RETURN->user["name"]);
         //var_dump($r);
 
         if (Node($RETURN, "getnewaddress", [$label, $type], $RETURN->user["name"]))
         {
             Response($RETURN, "new address added");
+            Pretty($RETURN);
         }
         else
         {
             Fail($RETURN, "could not add new address");
         }
+    }
+
+    function SendfromAddress($RETURN)
+    {
+        self::Wallet($RETURN);
+
+        $input = self::_BuildInputA($RETURN);
+        $output = array();
+
+        $change = $RETURN->send["liquidity"] - $RETURN->send["amount"] - self::$_ServiceFee;
+        if ($change < self::$_minSendingAmount) Fail($RETURN, "dust error");
+
+        $output[$RETURN->send["origin"]] = number_format($change, 8, ".", "");
+        $output[self::_ServiceFeeDestination()] = self::$_ServiceFee;
+        $output[$RETURN->send["destination"]] = number_format($RETURN->send["amount"], 8, ".", "");
+
+        $txhex = self::_BuildOutputA($RETURN, $input, $output);
+
+        //prepare for sign
+
+        exit;
     }
 
     function TokenList($RETURN, $origin, $token, $amount, $desire)

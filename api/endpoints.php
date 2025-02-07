@@ -113,6 +113,8 @@ switch ($_GET["method"])
         if (!isset($_GET["label"])) $label = "default";
         else $label = preg_replace( "/[^a-zA-Z0-9_]/", "", $_GET["label"]);
 
+        if ($label == "" || $label == NULL) $label = "default";
+
         if (isset($_GET["type"]))
         {
             if ($_GET["type"] == "legacy" || $_GET["type"] == "p2sh-segwit" || $_GET["type"] == "bech32") $type = $_GET["type"];
@@ -124,6 +126,26 @@ switch ($_GET["method"])
         $USER->get($RETURN);
         $LITECOIN->NewAddress($RETURN, $label, $type);
         Done($RETURN);
+    break;
+
+    case "ltc-send-address":
+        if (!isset($_GET["authkey"])) Fail($RETURN, "parameter \"authkey\" missing");
+        if (!isset($_GET["origin"])) Fail($RETURN, "parameter \"origin\" missing");
+        if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
+        if (!isset($_GET["destination"])) Fail($RETURN, "parameter \"destination\" missing");
+
+        # fange Eingaben auf
+        $RETURN->send = array();
+        $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
+        $RETURN->send["amount"] = preg_replace( "/[^0-9.]/", "", $_GET["amount"]);
+        $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
+
+        if (isset($_GET["feemod"])) $RETURN->send["feemod"] = intval($_GET["feemod"]);
+        else $RETURN->send["feemod"] = 3;
+
+        $USER->get($RETURN);
+        $LITECOIN->SendfromAddress($RETURN);
+        DoneLTC($RETURN);
     break;
 
     case "ltcomni-token-list":
