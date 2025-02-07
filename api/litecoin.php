@@ -6,7 +6,7 @@ class Litecoin
     private static $_ServiceFeeFaucet = "MCtYmUDUvjCatos2whjAsPaBr2a1nwA1tG";
 
     private static $_minSendingAmount = 0.00006;
-    private static $_ServiceFee = "0.00025";
+    private static $_ServiceFee = 0.00025;
 
     private function _ServiceFeeDestination()
     {
@@ -184,7 +184,7 @@ class Litecoin
         if ($change < self::$_minSendingAmount) Fail($RETURN, "dust error");
 
         $output[$RETURN->send["origin"]] = number_format($change, 8, ".", "");
-        $output[self::_ServiceFeeDestination()] = self::$_ServiceFee;
+        $output[self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
         $output[$RETURN->send["destination"]] = number_format($RETURN->send["amount"], 8, ".", "");
 
         $txhex = self::_BuildOutputA($RETURN, $input, $output);

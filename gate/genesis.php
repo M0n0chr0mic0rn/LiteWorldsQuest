@@ -42,8 +42,8 @@ else
 
     # Fehler anzeigen
     ini_set("display_errors", 1);
-    //error_reporting(E_ALL ^ E_WARNING);
-    error_reporting(E_ALL);
+    error_reporting(E_ALL ^ E_WARNING);
+    //error_reporting(E_ALL);
 
     # den Inhalt setzen wir auf JSON
     header("Content-type: application/json; charset=utf-8");
