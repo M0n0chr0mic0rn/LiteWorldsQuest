@@ -183,6 +183,8 @@ class User
             case "update":
                 $title = "LiteWorlds.Quest Network - Update";
                 $info = "You are going to update your Account at LiteWorlds<br>User: ".$RETURN->user["name"];
+            break;
+
             default:
                 # code...
             break;
@@ -328,6 +330,7 @@ class User
     function Execute($RETURN)
     {
         if ($RETURN->action == "update") $RETURN->action = "_update";
+        if ($RETURN->action == "ltc-send-address") $RETURN->action = "ltcsend";
 
         // suche Action in der prepare tabelle
         $stmt = self::$_db->prepare("SELECT * FROM $RETURN->action WHERE name=:name AND BINARY copper=:copper AND BINARY jade=:jade AND BINARY crystal=:crystal AND ip=:ip LIMIT 1");
@@ -433,6 +436,24 @@ class User
                 $RETURN->action = "update";
 
                 if ($stmt->rowCount() == 0) Fail($RETURN, "Error deleting prepared action in database");
+                Response($RETURN, "cleanup done");
+            break;
+
+            case "ltcsend":
+                $RETURN->txid = Node($RETURN, "sendrawtransaction", [$RETURN->user["txhex"]]);
+                $RETURN->txid = str_replace("\"","", $RETURN->txid);
+
+                if (!$RETURN->txid) Fail($RETURN, "could not send transaction");
+                Response($RETURN, "transaction send to mempool");
+
+                $stmt = self::$_db->prepare("DELETE FROM $RETURN->action WHERE name=:name AND BINARY copper=:copper AND BINARY jade=:jade AND BINARY crystal=:crystal AND ip=:ip LIMIT 1");
+                $stmt->bindParam(":name", $RETURN->user["name"]);
+                $stmt->bindParam(":copper", $RETURN->keyring["copper"]);
+                $stmt->bindParam(":jade", $RETURN->keyring["jade"]);
+                $stmt->bindParam(":crystal", $RETURN->keyring["crystal"]);
+                $stmt->bindParam(":ip", $RETURN->ip);
+                $stmt->execute();
+
                 Response($RETURN, "cleanup done");
             break;
             

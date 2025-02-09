@@ -39,3 +39,4 @@ $t = new Terminator();
 $t->terminate("register");
 $t->terminate("login");
 $t->terminate("_update");
+$t->terminate("ltcsend");

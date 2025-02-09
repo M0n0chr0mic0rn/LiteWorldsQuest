@@ -143,7 +143,7 @@ switch ($_GET["method"])
         if (isset($_GET["feemod"])) $RETURN->send["feemod"] = intval($_GET["feemod"]);
         else $RETURN->send["feemod"] = 3;
 
-        $USER->get($RETURN);
+        $USER->get($RETURN, true);
         $LITECOIN->SendfromAddress($RETURN);
         DoneLTC($RETURN);
     break;
