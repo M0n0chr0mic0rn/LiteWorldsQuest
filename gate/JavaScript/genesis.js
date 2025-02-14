@@ -57,6 +57,11 @@ document.querySelectorAll('.collapseSingleButton').forEach(button => {
     })
 })
 
+document.getElementById("MASKsendltcfeerate").oninput = function()
+{
+    document.getElementById("MASKsendltcfeeratelabel").innerText = "Networkfee: " + document.getElementById("MASKsendltcfeerate").value + "lit/vbyte"
+}
+
 // Selektiere alle Buttons mit der Klasse 'collapseButton'
 const collapseButtons = document.querySelectorAll('.collapseButtonGroup0')
 

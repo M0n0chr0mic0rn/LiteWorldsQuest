@@ -161,8 +161,13 @@ async function LITECOINsend()
     const origin = document.getElementById("MASKsendltcorigin").innerText
     const amount = document.getElementById("MASKsendltcamount").value
     const destination = document.getElementById("MASKsendltcdestination").value
+    const payservicefee = document.getElementById("MASKsendltcfee").checked
+    const networkfee = document.getElementById("MASKsendltcfeerate").value
 
-    const url = API + "ltc-send-address&authkey=" + AUTHKEY + "&origin=" + origin + "&amount=" + amount + "&destination=" + destination
+    console.log("servicefee:", payservicefee)
+
+    let url = API + "ltc-send-address&authkey=" + AUTHKEY + "&origin=" + origin + "&amount=" + amount + "&destination=" + destination + "&networkfee=" + networkfee
+    if (payservicefee) url += "&fee"
     console.log(url)
     const response = await (await fetch(url)).json()
 

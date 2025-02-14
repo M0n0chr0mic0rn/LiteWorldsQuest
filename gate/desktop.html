@@ -135,6 +135,14 @@
             <input type="number" id="MASKsendltcamount" name="MASKsendltcamount" style="margin-top: 9px;">
             <label for="MASKsendltcdestination">Destination</label>
             <input type="text" id="MASKsendltcdestination" name="MASKsendltcdestination" style="margin-top: 9px;">
+            <label for="MASKsendltcfee">Support Development<input type="checkbox" name="MASKsendltcfee" id="MASKsendltcfee" style="position: absolute; width: auto; margin-bottom: 0; margin-top: 5px; margin-left: 10px;" checked></label>
+
+            <div>
+                <label id="MASKsendltcfeeratelabel" for="MASKsendltcfeerate">Networkfee: 3 lit/vbyte</label>
+                <input type="range" min="3" max="30" value="3" step="0.1" class="slider" id="MASKsendltcfeerate" name="MASKsendltcfeerate">
+            </div>
+            
+            
             <button class="ButtonRed" style="margin-top: 9px;" onclick="LITECOINsend()">Send</button>
             <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('sendltc')">Close Mask</button>
         </div>

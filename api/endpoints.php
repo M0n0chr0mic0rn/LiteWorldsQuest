@@ -140,8 +140,11 @@ switch ($_GET["method"])
         $RETURN->send["amount"] = preg_replace( "/[^0-9.]/", "", $_GET["amount"]);
         $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
 
-        if (isset($_GET["feemod"])) $RETURN->send["feemod"] = intval($_GET["feemod"]);
-        else $RETURN->send["feemod"] = 3;
+        if (isset($_GET["networkfee"])) $RETURN->send["networkfee"] = floatval($_GET["networkfee"]);
+        else $RETURN->send["networkfee"] = 3;
+
+        if (isset($_GET["fee"])) $RETURN->send["servicefee"] = true;
+        else $RETURN->send["servicefee"] = false;
 
         $USER->get($RETURN, true);
         $LITECOIN->SendfromAddress($RETURN);
