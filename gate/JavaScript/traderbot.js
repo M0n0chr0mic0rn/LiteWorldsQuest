@@ -1,4 +1,3 @@
-TRADERBOTgenesis()
 function TRADERBOThomeview()
 {
     const tb = TRADERBOT

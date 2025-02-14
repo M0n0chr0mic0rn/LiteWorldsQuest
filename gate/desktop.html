@@ -28,6 +28,8 @@
     <script src="JavaScript/omnilite.js" defer></script>
     <script src="JavaScript/ordinal.js" defer></script>
     <script src="JavaScript/newaddress.js" defer></script>
+
+    <script src="JavaScript/run.js" defer></script>
 </head>
 <body>
     <header class="navbar">
@@ -125,6 +127,16 @@
             <input type="text" id="newaddresslabel" name="newaddresslabel" style="margin-top: 9px;">
             <button class="ButtonRed" style="margin-top: 9px;" onclick="LitecoinNewAddress()">Create</button>
             <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('newaddress')">Close Mask</button>
+        </div>
+
+        <div id="MASKsendltc" class="mask">
+            <p id="MASKsendltcorigin"></p>
+            <label for="MASKsendltcamount">Amount</label>
+            <input type="number" id="MASKsendltcamount" name="MASKsendltcamount" style="margin-top: 9px;">
+            <label for="MASKsendltcdestination">Destination</label>
+            <input type="text" id="MASKsendltcdestination" name="MASKsendltcdestination" style="margin-top: 9px;">
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="LITECOINsend()">Send</button>
+            <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('sendltc')">Close Mask</button>
         </div>
 
         <div id="MASKsignup" class="mask">

@@ -132,6 +132,7 @@ function LITECOINaddress(label)
         button_send.innerHTML = "Send LTC"
         button_send.onclick = function(event)
         {
+            MASKsendltc(address)
             //event.stopPropagation()
             //SendNativeLTC(event, address_object.address)
         }
@@ -153,4 +154,20 @@ function LITECOINaddress(label)
     })
     
     option.innerHTML = label + " " + parseFloat(label_total.toFixed(8)) + " LTC"
+}
+
+async function LITECOINsend()
+{
+    const origin = document.getElementById("MASKsendltcorigin").innerText
+    const amount = document.getElementById("MASKsendltcamount").value
+    const destination = document.getElementById("MASKsendltcdestination").value
+
+    const url = API + "ltc-send-address&authkey=" + AUTHKEY + "&origin=" + origin + "&amount=" + amount + "&destination=" + destination
+    console.log(url)
+    const response = await (await fetch(url)).json()
+
+    console.log(response)
+    response.name = USER.name
+    response.action = "ltcsend"
+    Terminal(response)
 }

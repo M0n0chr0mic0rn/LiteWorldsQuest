@@ -1,4 +1,4 @@
-fetch(API + "get&authkey=" + AUTHKEY).then(response => response.json()).then(data =>
+/*fetch(API + "get&authkey=" + AUTHKEY).then(response => response.json()).then(data =>
 {
     console.log(data, AUTHKEY)
     if (data.bool)
@@ -9,7 +9,20 @@ fetch(API + "get&authkey=" + AUTHKEY).then(response => response.json()).then(dat
         LITECOINgenesis()
         //getProperties()
     }
-})
+})*/
+async function Relogin()
+{
+    const response = await (await fetch(API + "get&authkey=" + AUTHKEY)).json()
+    console.log(response, AUTHKEY)
+    if (response.bool)
+    {
+        USER = response.user
+        MENUlogged("in")
+        SETTINGSgenesis()
+        LITECOINgenesis()
+        //getProperties()
+    }
+}
 
 async function Login()
 {

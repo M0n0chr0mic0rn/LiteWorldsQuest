@@ -1,4 +1,3 @@
-DEXgenesis()
 async function DEXgenesis()
 {
     await DEXget()

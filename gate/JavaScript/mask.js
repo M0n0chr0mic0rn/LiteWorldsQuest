@@ -143,3 +143,13 @@ function Terminal(content)
         }, 2000)
     }
 }
+
+function MASKsendltc(address)
+{
+    document.getElementById("MASKsendltcorigin").innerText = address
+
+    const mask = document.getElementById("MASKsendltc")
+
+    if (mask.style.display == "block") mask.style.display = "none"
+    else mask.style.display = "block"
+}

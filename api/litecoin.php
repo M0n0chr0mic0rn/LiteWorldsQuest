@@ -109,9 +109,9 @@ class Litecoin
 
             if ($index == count($utxos)) break;
         }
-        while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee));
+        while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"]));
 
-        if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee)) Fail($RETURN, "collide at dust amount");
+        if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"])) Fail($RETURN, "collide at dust amount");
 
         $RETURN->send["liquidity"] = $amount2send;
         return $input;
