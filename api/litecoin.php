@@ -20,6 +20,7 @@ class Litecoin
 
     private static $_minSendingAmount = 0.00006;
     private static $_ServiceFee = 0.00025;
+    private static $_inputWeight = 0.0000015;
 
     private function sendEmail($RETURN)
     {
@@ -90,7 +91,7 @@ class Litecoin
     {
         $r = Node($RETURN, "decoderawtransaction", [$hex], $RETURN->user["name"]);
         $tx = json_decode($r);
-        $fee = $tx->vsize * 3;
+        $fee = $tx->vsize * $RETURN->send["networkfee"];
         return $fee;
     }
 
@@ -101,17 +102,38 @@ class Litecoin
         $amount2send = 0;
         $input = array();
         $index = 0;
-        do
+        $exceptedfee = 0;
+        if ($RETURN->send["servicefee"])
         {
-            array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
-            $amount2send += $utxos[$index]->amount;
-            $index++;
+            do
+            {
+                array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
+                $amount2send += $utxos[$index]->amount;
+                $index++;
+                $exceptedfee += self::$_inputWeight;
 
-            if ($index == count($utxos)) break;
+                if ($index == count($utxos)) break;
+            }
+            while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"] + $exceptedfee));
+
+            if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"] + $exceptedfee)) Fail($RETURN, "collide at dust amount");
         }
-        while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"]));
+        else
+        {
+            do
+            {
+                array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
+                $amount2send += $utxos[$index]->amount;
+                $index++;
+                $exceptedfee += self::$_inputWeight;
 
-        if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"])) Fail($RETURN, "collide at dust amount");
+                if ($index == count($utxos)) break;
+            }
+            while($amount2send < (self::$_minSendingAmount + $RETURN->send["amount"] + $exceptedfee));
+
+            if ($amount2send < (self::$_minSendingAmount + $RETURN->send["amount"] + $exceptedfee)) Fail($RETURN, "collide at dust amount");
+        }
+        
 
         $RETURN->send["liquidity"] = $amount2send;
         return $input;
@@ -254,15 +276,23 @@ class Litecoin
         $RETURN->send["change"] = $RETURN->send["liquidity"] - $RETURN->send["amount"] - self::$_ServiceFee;
         if ($RETURN->send["change"] < self::$_minSendingAmount) Fail($RETURN, "dust error");
 
-        $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["change"], 8, ".", "");
-        $RETURN->send["output"][self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
+        if ($RETURN->send["servicefee"])
+        {
+            $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["change"], 8, ".", "");
+            $RETURN->send["output"][self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
+        }
+        else
+        {
+            $RETURN->send["output"][$RETURN->send["origin"]] = number_format(($RETURN->send["change"] + self::$_ServiceFee), 8, ".", "");
+        }
+        
         $RETURN->send["output"][$RETURN->send["destination"]] = number_format($RETURN->send["amount"], 8, ".", "");
 
         self::_BuildOutputA($RETURN);
         Response($RETURN, "build output");
 
-        $keyring = self::$Key->Craft2FA("ltcsend");   // einzigartigen Schlüsselbund erzeugen
-        $time = time() + (60 * 3);                  // Zeitstempel nehmen (UNIX Zeit - 3min in der Zukunft - Stempel für den Terminator)
+        $keyring = self::$Key->Craft2FA("ltcsend");     // einzigartigen Schlüsselbund erzeugen
+        $time = time() + (60 * 3);                      // Zeitstempel nehmen (UNIX Zeit - 3min in der Zukunft - Stempel für den Terminator)
 
         //prepare for sign
         $stmt = self::$_db->prepare("INSERT INTO ltcsend (name, time, copper, jade, crystal, ip, txhex) VALUES (:name, :time, :copper, :jade, :crystal, :ip, :txhex)");
