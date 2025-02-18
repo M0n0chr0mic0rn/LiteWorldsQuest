@@ -62,6 +62,12 @@ document.getElementById("MASKsendltcfeerate").oninput = function()
     document.getElementById("MASKsendltcfeeratelabel").innerText = "Networkfee: " + document.getElementById("MASKsendltcfeerate").value + "lit/vbyte"
 }
 
+document.getElementById("MASKsendltcall").onchange = function()
+{
+    if (document.getElementById("MASKsendltcall").checked) document.getElementById("MASKsendltcamount").style.display = "none"
+    else document.getElementById("MASKsendltcamount").style.display = "inline-block"
+}
+
 // Selektiere alle Buttons mit der Klasse 'collapseButton'
 const collapseButtons = document.querySelectorAll('.collapseButtonGroup0')
 

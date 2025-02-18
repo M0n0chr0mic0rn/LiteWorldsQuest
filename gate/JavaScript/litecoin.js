@@ -4,10 +4,18 @@ async function LITECOINgenesis()
     WALLET.litecoin = (await (await fetch(url)).json()).litecoin
 
     console.log(WALLET)
-    LITECOINlabels()
+    LITECOINlabels("default")
 }
 
-function LITECOINlabels()
+async function LITECOINrefresh(label)
+{
+    const url = API + "ltc-get&authkey=" + AUTHKEY
+    WALLET.litecoin = (await (await fetch(url)).json()).litecoin
+
+    LITECOINlabels(label)
+}
+
+function LITECOINlabels(active)
 {
     _LitecoinWalletLabels.innerHTML = ""
 
@@ -17,13 +25,6 @@ function LITECOINlabels()
     _LitecoinWalletLabels.appendChild(headline)
 
     const select = document.createElement("select")
-    const doption = document.createElement("option")
-    doption.innerText = "Choose a label"
-    doption.value = "default"
-    select.appendChild(doption)
-    doption.disabled = true
-    select.onchange = () => { LITECOINaddress(select.value) }
-
     _LitecoinWalletLabels.appendChild(select)
 
     const addresses = document.createElement("div")
@@ -37,8 +38,26 @@ function LITECOINlabels()
         option.innerText = label
         select.appendChild(option)
 
-        LITECOINaddress(label)
+        if (active == label) LITECOINaddress(label)
     })
+
+    select.value = active
+    select.onchange = () => { LITECOINaddress(select.value) }
+    
+    const buttons = document.createElement("div")
+    buttons.style.position = "absolute"
+    buttons.style.right = 0
+    buttons.style.top = 0
+    _LitecoinWalletLabels.appendChild(buttons)
+
+    const refresh = document.createElement("button")
+    refresh.innerText = "Refresh"
+    refresh.onclick = function()
+    {
+        //select.onchange = () => { LITECOINaddress(select.value) }
+        LITECOINrefresh(select.value)
+    }
+    buttons.appendChild(refresh)
 
     const createadr = document.createElement("button")
     createadr.innerText = "New Address"
@@ -46,10 +65,7 @@ function LITECOINlabels()
     {
         Mask("newaddress")
     }
-    createadr.style.position = "absolute"
-    createadr.style.right = 0
-    createadr.style.top = 0
-    _LitecoinWalletLabels.appendChild(createadr)
+    buttons.appendChild(createadr)
 }
 
 function LITECOINaddress(label)
@@ -101,7 +117,7 @@ function LITECOINaddress(label)
         const utxos = WALLET.litecoin[label][address]
         utxos.forEach(utxo => 
         {
-            console.log(utxo)
+            //console.log(utxo)
             const utxo_span_id = document.createElement("span")
             const utxo_span_amount = document.createElement("span")
 
@@ -159,10 +175,14 @@ function LITECOINaddress(label)
 async function LITECOINsend()
 {
     const origin = document.getElementById("MASKsendltcorigin").innerText
-    const amount = document.getElementById("MASKsendltcamount").value
     const destination = document.getElementById("MASKsendltcdestination").value
     const payservicefee = document.getElementById("MASKsendltcfee").checked
     const networkfee = document.getElementById("MASKsendltcfeerate").value
+
+    var amount
+    if (document.getElementById("MASKsendltcall").checked) amount = "all"
+    else amount = document.getElementById("MASKsendltcamount").value
+    
 
     console.log("servicefee:", payservicefee)
 

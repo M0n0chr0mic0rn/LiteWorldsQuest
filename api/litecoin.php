@@ -18,9 +18,46 @@ class Litecoin
     private static $_ServiceFeeFoundation = "MP2bKNDoDGXmG4j5V4aaTNqXhP9ZybLGnk";
     private static $_ServiceFeeFaucet = "MCtYmUDUvjCatos2whjAsPaBr2a1nwA1tG";
 
-    private static $_minSendingAmount = 0.00006;
+    private static $_minSendingAmount = 0.000054;
     private static $_ServiceFee = 0.00025;
     private static $_inputWeight = 0.0000015;
+
+    private function _PrepareSend($RETURN)
+    {
+        $keyring = self::$Key->Craft2FA("ltcsend");         // einzigartigen Schlüsselbund erzeugen
+        $RETURN->send["expire"] = time() + (60 * 3);        // Zeitstempel nehmen (UNIX Zeit - 3min in der Zukunft - Stempel für den Terminator)
+
+        //prepare for sign
+        $stmt = self::$_db->prepare("INSERT INTO ltcsend (name, time, copper, jade, crystal, ip, txhex) VALUES (:name, :time, :copper, :jade, :crystal, :ip, :txhex)");
+        $stmt->bindParam(":name", $RETURN->user["name"]);
+        $stmt->bindParam(":time", $RETURN->send["expire"]);
+        $stmt->bindParam(":copper", $keyring->copper);
+        $stmt->bindParam(":jade", $keyring->jade);
+        $stmt->bindParam(":crystal", $keyring->crystal);
+        $stmt->bindParam(":ip", $RETURN->ip);
+        $stmt->bindParam(":txhex", $RETURN->send["signedtxhex"]->hex);
+        $stmt->execute();
+
+        if ($stmt->rowCount() != 1) Fail($RETURN, "Could not insert action into database");
+        Response($RETURN, "action prepared");
+
+        $RETURN->security = array();
+        $RETURN->security["link"] = self::$API . "execute&action=ltcsend&name=" . $RETURN->user["name"] . "&copper=" . $keyring->copper . "&jade=" . $keyring->jade . "&crystal=" . $keyring->crystal; // Link zum signieren der Registrierung
+
+        switch ($RETURN->user["security"])
+        {
+            case 'email':
+                self::sendEmail($RETURN);
+            break;
+            
+            case 'telegram':
+                $RETURN->security["message"] = "LiteWorlds.Quest Network - Send Litecoin from Address"; // Nachricht des Telegam Bots
+                $RETURN->security["text"] = "You are going to send Litecoin via LiteWorlds.Quest User: ".$RETURN->user["name"];    // Beschriftung des Buttons
+                
+                self::$Telegram->Send($RETURN);      // Nachricht vom Bot senden lassen
+            break;
+        }
+    }
 
     private function sendEmail($RETURN)
     {
@@ -95,51 +132,65 @@ class Litecoin
         return $fee;
     }
 
-    private function _BuildInputA($RETURN)
+    private function _BuildInputA($RETURN, $all = false)
     {
-        $utxos = json_decode(Node($RETURN, "listunspent", [0,999999999,[$RETURN->send["origin"]]], $RETURN->user["name"]));
-
-        $amount2send = 0;
-        $input = array();
-        $index = 0;
-        $exceptedfee = 0;
-        if ($RETURN->send["servicefee"])
+        if ($all)
         {
-            do
+            $RETURN->send["utxo"] = json_decode(Node($RETURN, "listunspent", [0,999999999,[$RETURN->send["origin"]]], $RETURN->user["name"]));
+            $RETURN->send["input"] = array();
+
+            foreach ($RETURN->send["utxo"] as $index => $utxo)
             {
-                array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
-                $amount2send += $utxos[$index]->amount;
-                $index++;
-                $exceptedfee += self::$_inputWeight;
-
-                if ($index == count($utxos)) break;
+                $RETURN->send["amount"] += $utxo->amount;
+                array_push($RETURN->send["input"], array("txid"=>$utxo->txid, "vout"=>$utxo->vout));
             }
-            while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"] + $exceptedfee));
-
-            if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"] + $exceptedfee)) Fail($RETURN, "collide at dust amount");
         }
         else
         {
-            do
+            $utxos = json_decode(Node($RETURN, "listunspent", [0,999999999,[$RETURN->send["origin"]]], $RETURN->user["name"]));
+
+            $amount2send = 0;
+            $input = array();
+            $index = 0;
+            $exceptedfee = 0;
+            if ($RETURN->send["servicefee"])
             {
-                array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
-                $amount2send += $utxos[$index]->amount;
-                $index++;
-                $exceptedfee += self::$_inputWeight;
+                do
+                {
+                    array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
+                    $amount2send += $utxos[$index]->amount;
+                    $index++;
+                    $exceptedfee += self::$_inputWeight;
 
-                if ($index == count($utxos)) break;
+                    if ($index == count($utxos)) break;
+                }
+                while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"] + $exceptedfee));
+
+                if ($amount2send < (self::$_minSendingAmount + self::$_ServiceFee + $RETURN->send["amount"] + $exceptedfee)) Fail($RETURN, "collide at dust amount");
             }
-            while($amount2send < (self::$_minSendingAmount + $RETURN->send["amount"] + $exceptedfee));
+            else
+            {
+                do
+                {
+                    array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
+                    $amount2send += $utxos[$index]->amount;
+                    $index++;
+                    $exceptedfee += self::$_inputWeight;
 
-            if ($amount2send < (self::$_minSendingAmount + $RETURN->send["amount"] + $exceptedfee)) Fail($RETURN, "collide at dust amount");
+                    if ($index == count($utxos)) break;
+                }
+                while($amount2send < (self::$_minSendingAmount + $RETURN->send["amount"] + $exceptedfee));
+
+                if ($amount2send < (self::$_minSendingAmount + $RETURN->send["amount"] + $exceptedfee)) Fail($RETURN, "collide at dust amount");
+            }
+            
+
+            $RETURN->send["liquidity"] = $amount2send;
+            return $input;
         }
-        
-
-        $RETURN->send["liquidity"] = $amount2send;
-        return $input;
     }
 
-    private function _BuildOutputA($RETURN)
+    private function _BuildOutputA($RETURN, $all = false)
     {
         $RETURN->send["txhex"] = Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]);
         $RETURN->send["txhex"] = str_replace("\"","", $RETURN->send["txhex"]);
@@ -149,11 +200,20 @@ class Litecoin
         {
             $RETURN->send["networkfee"] = self::_Weight($RETURN, $RETURN->send["signedtxhex"]->hex) / 100000000;
 
-            $RETURN->send["output"][$RETURN->send["origin"]] = (float)$RETURN->send["output"][$RETURN->send["origin"]] - $RETURN->send["networkfee"];
+            if ($all)
+            {
+                $RETURN->send["output"][$RETURN->send["destination"]] = (float)$RETURN->send["output"][$RETURN->send["destination"]] - $RETURN->send["networkfee"];
+                if ($RETURN->send["output"][$RETURN->send["destination"]] < self::$_minSendingAmount) Fail($RETURN, "dust error");
 
-            if ($RETURN->send["output"][$RETURN->send["origin"]] < self::$_minSendingAmount) Fail($RETURN, "dust error");
+                $RETURN->send["output"][$RETURN->send["destination"]] = number_format($RETURN->send["output"][$RETURN->send["destination"]], 8, ".", "");
+            }
+            else
+            {
+                $RETURN->send["output"][$RETURN->send["origin"]] = (float)$RETURN->send["output"][$RETURN->send["origin"]] - $RETURN->send["networkfee"];
+                if ($RETURN->send["output"][$RETURN->send["origin"]] < self::$_minSendingAmount) Fail($RETURN, "dust error");
 
-            $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["output"][$RETURN->send["origin"]], 8, ".", "");
+                $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["output"][$RETURN->send["origin"]], 8, ".", "");
+            }
 
             $RETURN->send["txhex"] = Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]);
             $RETURN->send["txhex"] = str_replace("\"","", $RETURN->send["txhex"]);
@@ -324,6 +384,31 @@ class Litecoin
                 self::$Telegram->Send($RETURN);      // Nachricht vom Bot senden lassen
             break;
         }
+
+        Done($RETURN);
+    }
+
+    function SendfromAddressAll($RETURN)
+    {
+        $stmt = self::$_db->prepare("SELECT * FROM ltcsend WHERE name=:name LIMIT 1");
+        $stmt->bindParam(":name", $RETURN->user["name"]);
+        $stmt->execute();
+
+        if ($stmt->rowCount() != 0) Fail($RETURN, "prepared action already exists - confirm or wait for termination");
+        Response($RETURN, "action possible");
+
+        self::Wallet($RETURN);
+
+        self::_BuildInputA($RETURN, true);
+        Response($RETURN, "build input");
+
+        $RETURN->send["output"] = array();
+        $RETURN->send["output"][$RETURN->send["destination"]] = number_format($RETURN->send["amount"], 8, ".", "");
+
+        self::_BuildOutputA($RETURN, true);
+        Response($RETURN, "build output");
+
+        self::_PrepareSend($RETURN);
 
         Done($RETURN);
     }
