@@ -432,12 +432,12 @@ class Litecoin
         }
         while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee));
 
-        var_dump($origin);
-        var_dump($token);
-        var_dump($amount);
-        var_dump($desire);
-        var_dump($amount2send);
-        var_dump($input);
+        //var_dump($origin);
+        //var_dump($token);
+        //var_dump($amount);
+        //var_dump($desire);
+        //var_dump($amount2send);
+        //var_dump($input);
         //var_dump($RETURN);
 
         if ($amount2send >= (self::$_minSendingAmount + self::$_ServiceFee))
@@ -447,7 +447,7 @@ class Litecoin
             $output = array();
 
             $output[$origin] = number_format($amount2send - self::$_ServiceFee, 8, ".", "");
-            $output[self::_ServiceFeeDestination()] = self::$_ServiceFee;
+            $output[self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
 
             var_dump($output);
 
@@ -491,6 +491,7 @@ class Litecoin
                     var_dump($r->hex);
 
                     $r = json_decode(Node($RETURN, "sendrawtransaction", [$r->hex], $RETURN->user["name"]));
+                    Done($RETURN);
                 }
 
 

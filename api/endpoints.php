@@ -184,6 +184,8 @@ switch ($_GET["method"])
         $amount = preg_replace( "/[^0-9.]/", "", $_GET["amount"]);
         $desire = preg_replace( "/[^0-9.]/", "", $_GET["desire"]);
 
+        $RETURN->send["networkfee"] = 3;
+
         $USER->get($RETURN);
         $LITECOIN->TokenList($RETURN, $origin, $token, $amount, $desire);
     break; 

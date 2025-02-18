@@ -24,6 +24,27 @@ async function DEXget()
     //console.log(DEX)
 }
 
+async function DEXlist()
+{
+    const origin = document.getElementById("MASKdexListorigin").innerText
+    const propertyid = document.getElementById("MASKdexListtoken").innerText
+    const amount = document.getElementById("MASKdexListamount").value
+    const desire = document.getElementById("MASKdexListdesire").value
+
+    console.log(propertyid)
+
+    const url = API + "ltcomni-token-list&authkey=" + AUTHKEY + "&origin=" + origin + "&token=" + propertyid + "&amount=" + amount + "&desire=" + desire
+    console.log(url)
+
+    if (confirm("This action will perform a transaction, plz only perform it once. A better solution will be added soon."))
+    {
+        const response = await (await fetch(url)).json()
+        response.name = USER.name
+        response.action = "ltcomni-token-list"
+        Terminal(response)
+    }
+}
+
 async function DEXprint(where)
 {
     switch (where) {

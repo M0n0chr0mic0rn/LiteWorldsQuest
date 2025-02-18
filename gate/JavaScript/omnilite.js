@@ -70,9 +70,11 @@ async function OMNILITEtokenOptions(address, token)
     list.innerText = "list on DEX"
     list.onclick = function()
     {
-        $desire = 1
-        const url = API + "ltcomni-token-list&authkey=" + AUTHKEY + "&origin=" + address + "&token=" + token.propertyid + "&amount=" + token.balance + "&desire=" + $desire
-        console.log(url)
+        console.log(token)
+        document.getElementById("MASKdexListorigin").innerText = address
+        document.getElementById("MASKdexListtoken").innerText = token.propertyid
+        document.getElementById("MASKdexListname").innerText = token.name
+        Mask("dexList")
     }
 }
 
