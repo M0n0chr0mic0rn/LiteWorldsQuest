@@ -126,6 +126,28 @@ function Terminal(content)
                                 {
                                     Mask("login")
                                 }
+
+                                if (content.action == "ltcsend")
+                                {
+                                    LITECOINrefresh(document.getElementById("LitecoinLabel").value)
+
+                                    let ltcspace = document.createElement("a")
+                                    ltcspace.target = "_blank"
+                                    ltcspace.href = "https://litecoinspace.org/address/" + content.send["origin"]
+                                    ltcspace.innerText = "Open in Explorer"
+                                    ltcspace.style.textDecoration = "none"
+                                    ltcspace.style.position = "absolute"
+                                    ltcspace.style.bottom = "10px"
+                                    ltcspace.style.right = "10px"
+                                    ltcspace.style.fontSize = "1.1rem"
+                                    ltcspace.style.color = "white"
+
+                                    terminal.appendChild(ltcspace)
+
+                                    setTimeout(() => {
+                                        ltcspace.remove()
+                                    }, 5000)
+                                }
                             }
                         }
                     }

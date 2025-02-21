@@ -20,11 +20,15 @@ const _LitecoinWalletLabels = document.getElementById("litecoin-wallet").childre
 const _LitecoinWalletDetails = document.getElementById("litecoin-wallet").children[1]
 const _LitecoinWalletOptions = document.getElementById("litecoin-wallet").children[2]
 
+const _LitecoinOmniliteDEX = document.getElementById("litecoin-omnilite-dex")
+const _LitecoinOmniliteDEXlist = document.getElementById("litecoin-omnilite-dex").children[0]
+
 const _MASKsignUp = document.getElementById("MASKsignup")
 const _MASKlogin = document.getElementById("MASKlogin")
 const _MASKnewAddress = document.getElementById("MASKnewaddress")
 
-var DEX
+var DEX = []
+var DEXbyProperty = {}
 var TRADERBOT
 
 var USER

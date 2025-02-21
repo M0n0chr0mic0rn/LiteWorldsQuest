@@ -64,6 +64,8 @@ class Litecoin
         $title;
         $info;
 
+        $RETURN->security["text"] = "You are going to send Litecoin (Transaction Details soon)";
+
         switch ($RETURN->action)
         {
             case "ltc-send-address":

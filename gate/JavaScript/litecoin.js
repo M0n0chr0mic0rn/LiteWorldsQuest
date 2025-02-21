@@ -26,6 +26,7 @@ function LITECOINlabels(active)
 
     const select = document.createElement("select")
     _LitecoinWalletLabels.appendChild(select)
+    select.id = "LitecoinLabel"
 
     const addresses = document.createElement("div")
     _LitecoinWalletLabels.appendChild(addresses)
@@ -161,9 +162,21 @@ function LITECOINaddress(label)
             //MergeUTXO(event, address_object.address)
         }
 
+        const button_history = document.createElement("button")
+        button_history.innerHTML = "History"
+        button_history.onclick = function(event)
+        {
+            //event.stopPropagation()
+            //MergeUTXO(event, address_object.address)
+            let ltcspace = document.createElement("a")
+            ltcspace.target = "_blank"
+            ltcspace.href = "https://litecoinspace.org/address/" + address
+            ltcspace.click()
+        }
+
         details.appendChild(button_qr)
         details.appendChild(button_send)
-        details.appendChild(button_merge)
+        details.appendChild(button_history)
         container.appendChild(details)
 
         _LitecoinWalletLabels.children[2].appendChild(container)

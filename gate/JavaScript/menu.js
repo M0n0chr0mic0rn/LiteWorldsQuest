@@ -17,6 +17,11 @@ function MENUchange(content)
             _LitecoinWallet.style.display = "flex"
         break;
 
+        case "litecoin-omnilite-dex":
+            MENUhideAll()
+            _LitecoinOmniliteDEX.style.display = "flex"
+        break;
+
         case "settings":
             MENUhideAll()
             _Settings.style.display = "flex"
@@ -50,6 +55,7 @@ function MENUhideAll()
 {
     _Home.style.display = "none"
     _LitecoinWallet.style.display = "none"
+    _LitecoinOmniliteDEX.display = "none"
     _Settings.style.display = "none"
 }
 
@@ -62,7 +68,7 @@ function MENUlogged(type)
     ] 
     if (type == "in") display = [
         ["block", "none", "none", "block", "block"],
-        ["block", "block", "none", "none", "none", "none", "none"], // Litecoin
+        ["block", "block", "block", "none", "none", "none", "none"], // Litecoin
         ["block", "none"], // Kotia
     ]
     // unlock DevArea with DiveToken

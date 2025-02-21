@@ -3,7 +3,7 @@ API Logic
 1. genesis.php
 - decide between Website, Infopage or API
 - error handling, security settings
-- Global Functions for a little bit comfort - Response/Fail/Done/DoneLTC
+- Global Functions for a little bit comfort - Response/Fail/Done/DoneLTC/Node
 - RETURN Object - acts like an Kirby and gathers all information on the way excluded security data
 - AUTHKEY double check
 - Finally include classes, create objects of them and include the endpoints to use them
