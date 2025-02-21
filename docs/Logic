@@ -1,0 +1,22 @@
+API Logic
+
+1. genesis.php
+- decide between Website, Infopage or API
+- error handling, security settings
+- Global Functions for a little bit comfort - Response/Fail/Done/DoneLTC
+- RETURN Object - acts like an Kirby and gathers all information on the way excluded security data
+- AUTHKEY double check
+- Finally include classes, create objects of them and include the endpoints to use them
+
+2. endpoints.php
+- the full list of endpoints with security steps for the parameters/inputs
+- check all needed parameters a given
+- write their value into the RETRUN object with filter functions to prevent wrong or script input
+- Depending on depth, call USER data and prepare requested action
+
+3. Final Usage
+- with a call to the LiteWorlds API you request data which is either puplic or private/attached to a USER
+- public data is shown instantly
+- private data is shown with the valid AUTHKEY
+- for movements of private data a signature is required via on of our given 2fa methods
+    -> 3 seperated keys gets created and used unique to encrypt your action, also there is a time window of 3 minutes
