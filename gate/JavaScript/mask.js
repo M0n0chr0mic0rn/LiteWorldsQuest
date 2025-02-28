@@ -69,6 +69,15 @@ function Terminal(content)
         element.innerText = "Success! Connetion closed..."
         terminalcontent.appendChild(element)
 
+        if (content.action == "ltcomni-dex")
+        {
+            setTimeout(() => {
+                terminal.classList.toggle('open')
+            }, 5000)
+
+            throw "ltcomni-dex"
+        }
+
         const endline = document.createElement("p")
         terminalcontent.appendChild(endline)
         endline.innerText = "waiting for signature"
@@ -87,6 +96,7 @@ function Terminal(content)
             if (data.bool)
             {
                 clearInterval(myinterval)
+
                 endline.innerText = "waiting for signature " + time
                 const timeinterval = setInterval(async function(){
                     time--

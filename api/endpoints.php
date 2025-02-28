@@ -179,16 +179,55 @@ switch ($_GET["method"])
         if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
         if (!isset($_GET["desire"])) Fail($RETURN, "parameter \"desire\" missing");
 
-        $origin = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
-        $token = intval($_GET["token"]);
-        $amount = preg_replace( "/[^0-9.]/", "", $_GET["amount"]);
-        $desire = preg_replace( "/[^0-9.]/", "", $_GET["desire"]);
+        $RETURN->send = array();
+        $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
+        $RETURN->send["token"] = intval($_GET["token"]);
+        $RETURN->send["amount"] = preg_replace( "/[^0-9.]/", "", $_GET["amount"]);
+        $RETURN->send["desire"] = preg_replace( "/[^0-9.]/", "", $_GET["desire"]);
 
         $RETURN->send["networkfee"] = 3;
 
         $USER->get($RETURN);
-        $LITECOIN->TokenList($RETURN, $origin, $token, $amount, $desire);
-    break; 
+        $LITECOIN->TokenList($RETURN);
+    break;
+
+    case "ltcomni-token-cancel":
+        if (!isset($_GET["authkey"])) Fail($RETURN, "parameter \"authkey\" missing");
+        if (!isset($_GET["origin"])) Fail($RETURN, "parameter \"origin\" missing");
+        if (!isset($_GET["token"])) Fail($RETURN, "parameter \"token\" missing");
+
+        $RETURN->send = array();
+        $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
+        $RETURN->send["token"] = intval($_GET["token"]);
+        $RETURN->send["amount"] = 0;
+        $RETURN->send["desire"] = 0;
+        $RETURN->send["networkfee"] = 3;
+
+        $USER->get($RETURN);
+        $LITECOIN->TokenCancel($RETURN);
+    break;
+
+    case "ltcomni-token-request":
+        if (!isset($_GET["authkey"])) Fail($RETURN, "parameter \"authkey\" missing");
+        if (!isset($_GET["origin"])) Fail($RETURN, "parameter \"origin\" missing");
+        if (!isset($_GET["destination"])) Fail($RETURN, "parameter \"destination\" missing");
+        if (!isset($_GET["token"])) Fail($RETURN, "parameter \"token\" missing");
+        if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
+
+        $RETURN->send = array();
+        $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
+        $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
+        $RETURN->send["token"] = intval($_GET["token"]);
+        $RETURN->send["amount"] = number_format(floatval($_GET["amount"]), 8, ".", "");
+        $RETURN->send["networkfee"] = 3;
+
+        $USER->get($RETURN);
+        $LITECOIN->TokenRequestPurchase($RETURN);
+    break;
+
+    case "ltcomni-token-purchase":
+        $LITECOIN->go($RETURN);
+    break;
 
     # LITECOIN Public
     case "ltc-help":

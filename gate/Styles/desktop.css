@@ -12,7 +12,7 @@ html {
 /* Kopfzeile fixieren und Stil hinzufügen */
 body {
     font-family: 'Helvetica', 'Arial', sans-serif;
-    margin-top: 6dvh; /* Platz für den fixierten Header */
+    margin-top: 9dvh; /* Platz für den fixierten Header */
 }
 
 input {
@@ -76,10 +76,9 @@ main {
     flex-direction: column; /* Stapelt die Container vertikal */
     gap: 9px; /* Abstand zwischen den einzelnen main-container */
     background-color: #999;
-    height: calc(100dvh - 54px);
+    height: 91dvh;
 }
 
-/* main-container bleibt mit display: none, damit es per JavaScript sichtbar gemacht werden kann */
 .main-container {
     display: none; /* Flexbox für die drei Divs */
     justify-content: space-between; /* Gleichen Abstand zwischen den Divs */
@@ -88,7 +87,6 @@ main {
     align-items: stretch; /* Alle divs strecken sich auf die gleiche Höhe */
 }
 
-/* section bleibt mit display: none, damit es per JavaScript sichtbar gemacht werden kann */
 section {
     display: none; /* Flexbox für die drei Divs */
     justify-content: space-between; /* Gleichen Abstand zwischen den Divs */

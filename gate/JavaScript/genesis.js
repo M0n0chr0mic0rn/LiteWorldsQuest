@@ -22,6 +22,8 @@ const _LitecoinWalletOptions = document.getElementById("litecoin-wallet").childr
 
 const _LitecoinOmniliteDEX = document.getElementById("litecoin-omnilite-dex")
 const _LitecoinOmniliteDEXlist = document.getElementById("litecoin-omnilite-dex").children[0]
+const _LitecoinOmniliteView = document.getElementById("litecoin-omnilite-dex").children[1]
+const _LitecoinOmniliteOptions = document.getElementById("litecoin-omnilite-dex").children[2]
 
 const _MASKsignUp = document.getElementById("MASKsignup")
 const _MASKlogin = document.getElementById("MASKlogin")
@@ -36,6 +38,7 @@ var WALLET = new Object()
 var OMNI
 
 var AUTHKEY = localStorage.getItem("AuthKey")
+console.log(AUTHKEY)
 
 document.addEventListener('contextmenu', function(event)
 {

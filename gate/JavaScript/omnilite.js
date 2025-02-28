@@ -76,25 +76,20 @@ async function OMNILITEtokenOptions(address, token)
         document.getElementById("MASKdexListname").innerText = token.name
         Mask("dexList")
     }
+
+    const cancel = document.createElement("button")
+    _LitecoinWalletOptions.appendChild(cancel)
+    cancel.classList.add("ButtonRed")
+    cancel.innerText = "cancel Listing"
+    cancel.onclick = function()
+    {
+        console.log(token)
+        document.getElementById("MASKdexListorigin").innerText = address
+        document.getElementById("MASKdexListtoken").innerText = token.propertyid
+        document.getElementById("MASKdexListname").innerText = token.name
+        DEXcancel()
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -111,6 +106,15 @@ function getProperties()
         WalletFill()
         MENUchange("litecoin")
     })
+}
+
+async function OMNILITEgetProperty(propertyid)
+{
+    let url = API + "ltc-property-get&property=" + propertyid
+
+    let property = await (await fetch(url)).json()
+    console.log(property)
+    return property
 }
 
 function PropertiesFill()

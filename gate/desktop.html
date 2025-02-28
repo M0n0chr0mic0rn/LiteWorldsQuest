@@ -118,7 +118,7 @@
 
         <section id="litecoin-omnilite-dex">
             <div class="main-div"></div>
-            <div class="main-div"></div>
+            <div class="main-div" style="word-wrap: break-word;"></div>
             <div class="main-div"></div>
         </section>
     </main>
@@ -163,6 +163,17 @@
         <span>total in Litecoin</span><input type="number" id="MASKdexListdesire" value="0.0001" step="0.00000001" min="0.0001">
         <button class="ButtonRed" style="margin-top: 9px;" onclick="DEXlist()">List Token</button>
         <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('dexList')">Close Mask</button>
+    </div>
+
+    <div id="MASKdexRequest" class="mask">
+        <p id="MASKdexRequestorigin"></p>
+        <p id="MASKdexRequestdestination"></p>
+        <span id="MASKdexRequestname"></span>
+        <p id="MASKdexRequesttoken"></p>
+             
+        <span>Amount</span><input type="number" id="MASKdexRequestamount" value="1" step="1" min="1">
+        <button class="ButtonRed" style="margin-top: 9px;" onclick="DEXrequest()">Request Purchase</button>
+        <button class="ButtonRed" style="margin-top: 9px;" onclick="Mask('dexRequest')">Close Mask</button>
     </div>
 
     <div id="MASKsignup" class="mask">

@@ -22,6 +22,31 @@ class Litecoin
     private static $_ServiceFee = 0.00025;
     private static $_inputWeight = 0.0000015;
 
+    function go($RETURN)
+    {
+        $stmt = self::$_db->prepare("SELECT * FROM DEXpay");
+        $stmt->execute();
+
+        if ($stmt->rowCount() == 0) echo "{\"error\": \"No DEXpay data found\"}";
+
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($result as $key => $value)
+        {
+            $DEX = json_decode(Node($RETURN, "omni_getactivedexsells", [$value["destination"]]));
+            foreach ($DEX as $key => $listing) 
+            {
+                foreach ($listing->accepts as $key => $accept)
+                {
+                    if ($accept->buyer == $value["origin"])
+                    {
+                        $txhex = Node($RETURN, "omni_senddexpay", [$value["origin"], $value["destination"], $value["property"], $accept->amounttopay], $value["name"]);
+                    }
+                }
+            }
+        }
+    }
+
     private function _PrepareSend($RETURN)
     {
         $keyring = self::$Key->Craft2FA("ltcsend");         // einzigartigen Schlüsselbund erzeugen
@@ -134,6 +159,37 @@ class Litecoin
         return $fee;
     }
 
+    private function _DEXlisting($RETURN)
+    {
+        $DEX = json_decode(Node($RETURN, "omni_getactivedexsells"));
+
+        foreach ($DEX as $index => $listing)
+        {
+            if ($listing->seller == $RETURN->send["origin"])
+            {
+                $RETURN->send["desire"] = $listing->litecoindesired;
+                $RETURN->send["amount"] = $listing->amountavailable;
+                $RETURN->send["token"] = $listing->propertyid;
+            }
+        }
+    }
+
+    private function _DEXpay($RETURN)
+    {
+        #($wallet->address, $destination, $property, $amount)
+        #Node($RETURN, "omni_senddexpay", [$RETURN->send["origin"], $RETURN->send["destination"]], $RETURN->user["name"]);
+
+        $stmt = self::$_db->prepare("INSERT INTO DEXpay (name, origin, destination, property) VALUES (:name, :origin, :destination, :property)");
+        $stmt->bindParam(":name", $RETURN->user["name"]);
+        $stmt->bindParam(":origin", $RETURN->send["origin"]);
+        $stmt->bindParam(":destination", $RETURN->send["destination"]);
+        $stmt->bindParam(":property", $RETURN->send["token"]);
+        $stmt->execute();
+
+        if ($stmt->rowCount() != 1) Fail($RETURN, "Could not insert action into database");
+        Response($RETURN, "action recorded");
+    }
+
     private function _BuildInputA($RETURN, $all = false)
     {
         if ($all)
@@ -222,6 +278,107 @@ class Litecoin
 
             $RETURN->send["signedtxhex"] = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$RETURN->send["txhex"]], $RETURN->user["name"]));
         }
+    }
+
+    private function _BuildInputCS($RETURN, $multi = 1)
+    {
+        $RETURN->send["utxos"] = json_decode(Node($RETURN, "listunspent", [0,999999999,[$RETURN->send["origin"]]], $RETURN->user["name"]));
+        $RETURN->send["input"] = array();
+
+        $RETURN->send["ltc_amount"] = 0;
+        $index = 0;
+        do
+        {
+            array_push($RETURN->send["input"], array("txid"=>$RETURN->send["utxos"][$index]->txid, "vout"=>$RETURN->send["utxos"][$index]->vout));
+            $RETURN->send["ltc_amount"] += $RETURN->send["utxos"][$index]->amount;
+            $index++;
+
+            if ($index >= count($RETURN->send["utxos"])) break;
+        }
+        while($RETURN->send["ltc_amount"] < (($multi * self::$_minSendingAmount) + self::$_ServiceFee));
+
+        if ($RETURN->send["ltc_amount"] >= (self::$_minSendingAmount + self::$_ServiceFee)) return true;
+        else return false;
+    }
+
+    private function _BuildOutputC($RETURN, $payload)
+    {
+        $RETURN->send["output"] = array();
+        $RETURN->send["output"][$RETURN->send["origin"]] = number_format(($RETURN->send["ltc_amount"] - self::$_ServiceFee - self::$_minSendingAmount), 8, ".", "");
+        $RETURN->send["output"][self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
+        $RETURN->send["output"][$RETURN->send["destination"]] = number_format(self::$_minSendingAmount, 8, ".", "");
+
+        switch ($payload)
+        {
+            case "dex-request":
+                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexaccept", [$RETURN->send["token"], $RETURN->send["amount"]], $RETURN->user["name"]));
+            break;
+        }
+
+        
+        $RETURN->send["txhex"] = str_replace("\"","", Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]));
+        $RETURN->send["txhexmod"] = str_replace("\"","", Node($RETURN, "omni_createrawtx_opreturn", [$RETURN->send["txhex"], $RETURN->send["payload"]], $RETURN->user["name"]));
+        $RETURN->send["signedtxhex"] = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$RETURN->send["txhexmod"]], $RETURN->user["name"]));
+
+        if ($RETURN->send["signedtxhex"]->complete)
+        {
+            $RETURN->send["fee"] = self::_Weight($RETURN, $RETURN->send["signedtxhex"]->hex) / 100000000;
+            $RETURN->send["output"][$RETURN->send["origin"]] = (float)$RETURN->send["output"][$RETURN->send["origin"]] - $RETURN->send["fee"];
+            if ($RETURN->send["output"][$RETURN->send["origin"]] < self::$_minSendingAmount) return false;
+            $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["output"][$RETURN->send["origin"]], 8, ".", "");
+
+            $RETURN->send["txhex"] = str_replace("\"","", Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]));
+            $RETURN->send["txhexmod"] = str_replace("\"","", Node($RETURN, "omni_createrawtx_opreturn", [$RETURN->send["txhex"], $RETURN->send["payload"]], $RETURN->user["name"]));
+            $RETURN->send["signedtxhex"] = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$RETURN->send["txhexmod"]], $RETURN->user["name"]));
+            if ($RETURN->send["signedtxhex"]->complete) return true;
+        }
+        else return false;
+    }
+
+    private function _BuildOutputCS($RETURN, $payload)
+    {
+        $RETURN->send["output"] = array();
+        $RETURN->send["output"][$RETURN->send["origin"]] = number_format(($RETURN->send["ltc_amount"] - self::$_ServiceFee), 8, ".", "");
+        $RETURN->send["output"][self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
+
+        switch ($payload)
+        {
+            case "dex-list":
+                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexsell", [$RETURN->send["token"], $RETURN->send["amount"], $RETURN->send["desire"], 9, "0.000001", 1], $RETURN->user["name"]));
+            break;
+            
+            case "dex-update":
+                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexsell", [$RETURN->send["token"], $RETURN->send["amount"], $RETURN->send["desire"], 9, "0.000001", 2], $RETURN->user["name"]));
+            break;
+
+            case "dex-cancel":
+                self::_DEXlisting($RETURN);
+                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexsell", [$RETURN->send["token"], $RETURN->send["amount"], $RETURN->send["desire"], 9, "0.000001", 3], $RETURN->user["name"]));
+            break;
+
+            case "dex-request":
+                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexaccept", [$RETURN->send["token"], $RETURN->send["amount"]], $RETURN->user["name"]));
+            break;
+        }
+
+        
+        $RETURN->send["txhex"] = str_replace("\"","", Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]));
+        $RETURN->send["txhexmod"] = str_replace("\"","", Node($RETURN, "omni_createrawtx_opreturn", [$RETURN->send["txhex"], $RETURN->send["payload"]], $RETURN->user["name"]));
+        $RETURN->send["signedtxhex"] = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$RETURN->send["txhexmod"]], $RETURN->user["name"]));
+
+        if ($RETURN->send["signedtxhex"]->complete)
+        {
+            $RETURN->send["fee"] = self::_Weight($RETURN, $RETURN->send["signedtxhex"]->hex) / 100000000;
+            $RETURN->send["output"][$RETURN->send["origin"]] = (float)$RETURN->send["output"][$RETURN->send["origin"]] - $RETURN->send["fee"];
+            if ($RETURN->send["output"][$RETURN->send["origin"]] < self::$_minSendingAmount) return false;
+            $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["output"][$RETURN->send["origin"]], 8, ".", "");
+
+            $RETURN->send["txhex"] = str_replace("\"","", Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]));
+            $RETURN->send["txhexmod"] = str_replace("\"","", Node($RETURN, "omni_createrawtx_opreturn", [$RETURN->send["txhex"], $RETURN->send["payload"]], $RETURN->user["name"]));
+            $RETURN->send["signedtxhex"] = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$RETURN->send["txhexmod"]], $RETURN->user["name"]));
+            if ($RETURN->send["signedtxhex"]->complete) return true;
+        }
+        else return false;
     }
 
     function __construct()
@@ -415,90 +572,35 @@ class Litecoin
         Done($RETURN);
     }
 
-    function TokenList($RETURN, $origin, $token, $amount, $desire)
+    function TokenList($RETURN)
     {
-        //self::Wallet($RETURN);
+        if (!self::_BuildInputCS($RETURN)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildOutputCS($RETURN, "dex-list")) Fail($RETURN, "could not build output");
 
-        $utxos = json_decode(Node($RETURN, "listunspent", [0,999999999,[$origin]], $RETURN->user["name"]));
-
-        $amount2send = 0;
-        $input = array();
-        $index = 0;
-        do
-        {
-            array_push($input, array("txid"=>$utxos[$index]->txid, "vout"=>$utxos[$index]->vout));
-            $amount2send += $utxos[$index]->amount;
-            $index++;
-
-            if ($index == count($utxos)) break;
-        }
-        while($amount2send < (self::$_minSendingAmount + self::$_ServiceFee));
-
-        //var_dump($origin);
-        //var_dump($token);
-        //var_dump($amount);
-        //var_dump($desire);
-        //var_dump($amount2send);
-        //var_dump($input);
-        //var_dump($RETURN);
-
-        if ($amount2send >= (self::$_minSendingAmount + self::$_ServiceFee))
-        {
-            var_dump("READY TO GO");
-
-            $output = array();
-
-            $output[$origin] = number_format($amount2send - self::$_ServiceFee, 8, ".", "");
-            $output[self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
-
-            var_dump($output);
-
-            $txhex = Node($RETURN, "createrawtransaction", [$input, $output], $RETURN->user["name"]);
-            $txhex = str_replace("\"","", $txhex);
-            var_dump($txhex);
-
-            $payload = Node($RETURN, "omni_createpayload_dexsell", [$token, $amount, $desire, 9, "0.000001", 1], $RETURN->user["name"]);
-            $payload = str_replace("\"","", $payload);
-            var_dump($payload);
-            
-            $txhexmod = Node($RETURN, "omni_createrawtx_opreturn", [$txhex, $payload], $RETURN->user["name"]);
-            $txhexmod = str_replace("\"","", $txhexmod);
-
-            $r = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$txhexmod], $RETURN->user["name"]));
-            if ($r->complete)
-            {
-                var_dump($r->hex);
-
-                $networkfee = self::_Weight($RETURN, $r->hex) / 100000000;
-                $output[$origin] = (float)$output[$origin] - $networkfee;
-
-                if ($output[$origin] < self::$_minSendingAmount) Fail($RETURN, "dust error");
-                $output[$origin] = number_format($output[$origin], 8, ".", "");
-
-                var_dump("Final Output");
-                var_dump($output);
-
-                $txhex = Node($RETURN, "createrawtransaction", [$input, $output], $RETURN->user["name"]);
-                $txhex = str_replace("\"","", $txhex);
-
-                $payload = Node($RETURN, "omni_createpayload_dexsell", [$token, $amount, $desire, 9, "0.000001", 1], $RETURN->user["name"]);
-                $payload = str_replace("\"","", $payload);
-
-                $txhexmod = Node($RETURN, "omni_createrawtx_opreturn", [$txhex, $payload], $RETURN->user["name"]);
-                $txhexmod = str_replace("\"","", $txhexmod);
-
-                $r = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$txhexmod], $RETURN->user["name"]));
-                if ($r->complete)
-                {
-                    var_dump($r->hex);
-
-                    $r = json_decode(Node($RETURN, "sendrawtransaction", [$r->hex], $RETURN->user["name"]));
-                    Done($RETURN);
-                }
+        $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
 
 
-            }
-            
-        }
+        Done($RETURN);
+    }
+
+    function TokenCancel($RETURN)
+    {
+        if (!self::_BuildInputCS($RETURN)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildOutputCS($RETURN, "dex-cancel")) Fail($RETURN, "could not build output");
+
+        $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
+
+
+        Done($RETURN);
+    }
+
+    function TokenRequestPurchase($RETURN)
+    {
+        if (!self::_BuildInputCS($RETURN, 2)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildOutputC($RETURN, "dex-request")) Fail($RETURN, "could not build output");
+
+        #$RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
+        if ($RETURN->send["signedtxhex"]->complete) self::_DEXpay($RETURN);
+        Done($RETURN);
     }
 }

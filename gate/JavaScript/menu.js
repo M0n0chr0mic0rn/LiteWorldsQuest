@@ -55,7 +55,7 @@ function MENUhideAll()
 {
     _Home.style.display = "none"
     _LitecoinWallet.style.display = "none"
-    _LitecoinOmniliteDEX.display = "none"
+    _LitecoinOmniliteDEX.style.display = "none"
     _Settings.style.display = "none"
 }
 
