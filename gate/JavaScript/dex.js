@@ -88,7 +88,7 @@ async function DEXrequest()
     const url = API + "ltcomni-token-request&authkey=" + AUTHKEY + "&origin=" + origin + "&token=" + propertyid + "&amount=" + amount + "&destination=" + destination
     console.log(url)
 
-    if (confirm("WARNING!\nEXPERIMENTAL STATE!\nThis action will perform a transaction.\n Only perform it once and wait till your transaction is confirmed, then refresh your Wallet.\n A better solution will be added soon."))
+    if (confirm("WARNING!\nEXPERIMENTAL STATE!\nThis action will perform a transaction.\n Only perform it once and wait till your transaction is confirmed!\nAfter a second Transaktion will be released to complete your purchase\n A better solution will be added soon."))
     {
         const response = await (await fetch(url)).json()
         response.name = USER.name
@@ -163,10 +163,10 @@ async function DEXprintFull()
                             span.onclick = async function()
                             {
                                 _LitecoinOmniliteOptions.innerHTML = ""
-                                
+
                                 const button = document.createElement("button")
                                 _LitecoinOmniliteOptions.appendChild(button)
-                                button.classList.add("button-red")
+                                button.classList.add("ButtonRed")
                                 button.innerText = "Request"
                                 button.onclick = async function()
                                 {

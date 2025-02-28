@@ -10,13 +10,18 @@ class DEXpay
 
     function __construct()
     {
-        self::$_db = new mysqli(self::$_db_host, self::$_db_username, self::$_db_passwort, self::$_db_name);
-        if (self::$_db->connect_error) {
-            die("Connection failed: " . self::$_db->connect_error);
+        try
+        {
+            self::$_db = new PDO("mysql:host=" . self::$_db_host . ";dbname=" . self::$_db_name, self::$_db_username, self::$_db_passwort);
+        }
+        catch(PDOException $e)
+        {
+            echo "<br>DATABASE ERROR<br>".$e;
+            die();
         }
     }
 
-    function Node($method, $params = array(), $wallet = null, $rpc_url = "http://192.168.0.165:10000/") 
+    function Node($RETURN, $method, $params = array(), $wallet = null, $rpc_url = "http://192.168.0.165:10000/") 
     {
         if ($wallet) $rpc_url .= "wallet/" . urlencode($wallet);  # Wallet-Namen an die URL anhängen
 
@@ -55,10 +60,12 @@ class DEXpay
         return json_encode(json_decode($response, true)["result"], JSON_PRETTY_PRINT);
     }
 
-    function go()
+    function go($RETURN)
     {
         $stmt = self::$_db->prepare("SELECT * FROM DEXpay");
         $stmt->execute();
+
+        var_dump($stmt);
 
         if ($stmt->rowCount() == 0) echo "{\"error\": \"No DEXpay data found\"}";
 
@@ -66,8 +73,33 @@ class DEXpay
 
         foreach ($result as $key => $value)
         {
-            $DEX = Node("omni_getactivedexsells", [$value["destination"]]);
-            var_dump($DEX);
+            $DEX = json_decode(self::Node($RETURN, "omni_getactivedexsells", [$value["destination"]]));
+            foreach ($DEX as $key => $listing) 
+            {
+                foreach ($listing->accepts as $key => $accept)
+                {
+                    if ($accept->buyer == $value["origin"])
+                    {
+                        $txhex = self::Node($RETURN, "omni_senddexpay", [$value["origin"], $value["destination"], $value["property"], $accept->amounttopay], $value["name"]);
+
+                        if ($txhex)
+                        {
+                            $stmt = self::$_db->prepare("DELETE FROM DEXpay WHERE name=:name AND origin=:origin AND destination=:destination AND property=:property");
+                            $stmt->bindParam(":name", $value["name"]);
+                            $stmt->bindParam(":origin", $value["origin"]);
+                            $stmt->bindParam(":destination", $value["destination"]);
+                            $stmt->bindParam(":property", $value["property"]);
+                            $stmt->execute();
+
+                            if ($stmt->rowCount() == 1) echo "{\"success\": \"DEXrequest payed and record deleted\"}";
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
+$RETURN = "";
+$DEXpay = new DEXpay();
+$DEXpay->go($RETURN);

@@ -41,6 +41,18 @@ class Litecoin
                     if ($accept->buyer == $value["origin"])
                     {
                         $txhex = Node($RETURN, "omni_senddexpay", [$value["origin"], $value["destination"], $value["property"], $accept->amounttopay], $value["name"]);
+
+                        if ($txhex)
+                        {
+                            $stmt = self::$_db->prepare("DELETE FROM DEXpay WHERE name=:name AND origin=:origin AND destination=:destination AND property=:property");
+                            $stmt->bindParam(":name", $value["name"]);
+                            $stmt->bindParam(":origin", $value["origin"]);
+                            $stmt->bindParam(":destination", $value["destination"]);
+                            $stmt->bindParam(":property", $value["property"]);
+                            $stmt->execute();
+
+                            if ($stmt->rowCount() == 1) echo "{\"success\": \"DEXrequest payed and record deleted\"}";
+                        }
                     }
                 }
             }
@@ -599,7 +611,7 @@ class Litecoin
         if (!self::_BuildInputCS($RETURN, 2)) Fail($RETURN, "collide at dust amount");
         if (!self::_BuildOutputC($RETURN, "dex-request")) Fail($RETURN, "could not build output");
 
-        #$RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
+        $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
         if ($RETURN->send["signedtxhex"]->complete) self::_DEXpay($RETURN);
         Done($RETURN);
     }

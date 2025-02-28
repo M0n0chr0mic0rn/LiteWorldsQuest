@@ -225,10 +225,6 @@ switch ($_GET["method"])
         $LITECOIN->TokenRequestPurchase($RETURN);
     break;
 
-    case "ltcomni-token-purchase":
-        $LITECOIN->go($RETURN);
-    break;
-
     # LITECOIN Public
     case "ltc-help":
         header("Content-type: text/plain; charset=utf-8");
