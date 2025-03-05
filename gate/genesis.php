@@ -192,10 +192,12 @@ else
     #require_once("../api/telegram.php");
     require_once("../api/user.php");
     require_once("../api/litecoin.php");
+    require_once("../api/kotiaBridge.php");
 
     # Erstellen der Klassen und Zuweißung auf Varibale/Objekt
     $USER = new User();
     $LITECOIN = new Litecoin();
+    $BRIDGE = new Bridge();
 
     # API Endpunkte einbinden
     include("../api/endpoints.php");

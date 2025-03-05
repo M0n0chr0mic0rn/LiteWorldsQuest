@@ -265,7 +265,33 @@ switch ($_GET["method"])
         # trader address - MGTjUjDccbaCQZEyhFHDr1x9SAGwhyxa2L
         echo Node($RETURN, "omni_getnonfungibletokens", ["MGTjUjDccbaCQZEyhFHDr1x9SAGwhyxa2L"]);
     break;
+
+    case "ltc-bridge-kotia":
+        if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing - Litecoin Omnilite receive Address");
+        if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
+
+        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
+        $amount = number_format(floatval($_GET["amount"]), 8, ".", "");
     
+        $BRIDGE->CreateSwap($address, $amount);
+        Done($RETURN);
+    break;
+
+    # KOTIA LiteWorlds
+    case "kotia-bridge-ltc":
+        if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing - Litecoin Omnilite receive Address");
+        if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
+
+        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
+        $amount = number_format(floatval($_GET["amount"]), 8, ".", "");
+
+        if (substr($address, 0, 1) != "M") Fail($RETURN, "only swap to Litecoin M Address type");
+        if ((float)$amount < 1.0) Fail($RETURN, "amount below 1 Kotia not possible");
+    
+        $BRIDGE->CreateSwap($address, $amount);
+        Done($RETURN);
+    break;
+
     default:
         Fail($RETURN, "Method not found");
     break;
