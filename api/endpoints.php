@@ -273,20 +273,20 @@ switch ($_GET["method"])
         $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
         $amount = number_format(floatval($_GET["amount"]), 8, ".", "");
     
-        $BRIDGE->CreateSwap($address, $amount);
+        #$BRIDGE->CreateSwap($address, $amount);
         Done($RETURN);
     break;
 
     # KOTIA LiteWorlds
-    case "kotia-bridge-ltc":
-        if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing - Litecoin Omnilite receive Address");
+    case "kot-bridge-ltc":
+        if (!isset($_GET["destination"])) Fail($RETURN, "parameter \"destination\" missing - Litecoin Omnilite receive Address");
         if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
 
-        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
+        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
         $amount = number_format(floatval($_GET["amount"]), 8, ".", "");
 
         if (substr($address, 0, 1) != "M") Fail($RETURN, "only swap to Litecoin M Address type");
-        if ((float)$amount < 1.0) Fail($RETURN, "amount below 1 Kotia not possible");
+        if ((float)$amount < 1.0) Fail($RETURN, "min amount 1.00000000 Kotia");
     
         $BRIDGE->CreateSwap($address, $amount);
         Done($RETURN);

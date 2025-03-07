@@ -51,8 +51,20 @@ else
     # Zugang erlauben von ? in unserem Fall alle
     header("Access-Control-Allow-Origin:*");
 
-    # START globale Funktionen
+    # aufruf der Klassen
+    require_once("../api/maria.php");
+    require_once("../api/kirby.php");
+    require_once("../api/user.php");
+    require_once("../api/litecoin.php");
+    require_once("../api/kotiaBridge.php");
 
+    $Maria = new Maria();
+
+    $Kirby = new Kirby();
+    $Kirby->hello();
+
+
+    # START globale Funktionen
     # Abbruch und Anzeige des Vorgangs
     function Fail($RETURN, $error)
     {
@@ -178,6 +190,8 @@ else
     $RETURN->security = array();
     $RETURN->user = array();
     $RETURN->action = $_GET["method"];
+
+    # $AUTHKEYnew = json_decode(file_get_contents("php://input"), true)["authkey"];
     
     # AuthKey überprüfen
     if (isset($_GET["authkey"]))
@@ -188,11 +202,7 @@ else
         Response($RETURN, "authkey valid");
     }
 
-    # aufruf der Klassen
-    #require_once("../api/telegram.php");
-    require_once("../api/user.php");
-    require_once("../api/litecoin.php");
-    require_once("../api/kotiaBridge.php");
+    
 
     # Erstellen der Klassen und Zuweißung auf Varibale/Objekt
     $USER = new User();
