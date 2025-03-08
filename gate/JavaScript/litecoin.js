@@ -1,14 +1,14 @@
 async function LITECOINgenesis()
 {
-    /*const url = API + "ltc-get&authkey=" + AUTHKEY
+    const url = API + "ltc-get&authkey=" + AUTHKEY
     console.log(url)
 
-    WALLET.litecoin = (await (await fetch(url, {"method": "GET", "headers": {"X-Auth-Key": AUTHKEY}})).json()).litecoin
+    WALLET.litecoin = (await (await fetch(url)).json()).litecoin
     console.log(WALLET.litecoin)
     
-    LITECOINlabels("default")*/
+    LITECOINlabels("default")
 
-    try {
+    /*try {
         const response = await fetch(API + "ltc-get&authkey=" + AUTHKEY, {
             method: "POST",
             headers: {
@@ -21,17 +21,17 @@ async function LITECOINgenesis()
             throw new Error(`HTTP-Fehler! Status: ${response.status}`);
         }
 
-        const data = await response.text();
-        console.log("Antwort vom Server:", data);
+        WALLET.litecoin = await response.json();
+        console.log("Antwort vom Server:", WALLET.litecoin);
     } catch (error) {
         console.error("Fehler beim Senden:", error);
-    }
+    }*/
 }
 
 async function LITECOINrefresh(label)
 {
     const url = API + "ltc-get&authkey=" + AUTHKEY
-    WALLET.litecoin = (await (await fetch(url, {"method": "GET", "headers": {"authkeynew": AUTHKEY}})).json()).litecoin
+    WALLET.litecoin = (await (await fetch(url)).json()).litecoin
     console.log(WALLET.litecoin)
     LITECOINlabels(label)
 }

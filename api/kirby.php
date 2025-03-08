@@ -4,9 +4,11 @@ require_once("key.php");
 
 class Kirby
 {
-    private static $Star = [];
+    public $Telegram;
+    public $Key;
 
-    public static $API = "https://liteworlds.quest/?method=";
+    public $Star = [];
+    public $API = "https://liteworlds.quest/?method=";
 
     public static $_ServiceFeeFoundation = "MP2bKNDoDGXmG4j5V4aaTNqXhP9ZybLGnk";
     public static $_ServiceFeeFaucet = "MCtYmUDUvjCatos2whjAsPaBr2a1nwA1tG";
@@ -19,21 +21,19 @@ class Kirby
         "MCtYmUDUvjCatos2whjAsPaBr2a1nwA1tG"    # Faucet
     ];
 
-    public static $Telegram;
-    public static $Key;
-
-    function __construct(){
-        self::$Telegram = new Telegram;
-        self::$Key = new Key;
+    public function __construct(){
+        $this->Telegram = new Telegram;
+        $this->Key = new Key;
 
         try{
-            self::$Star["response"] = ["inhale"];
-            self::$Star["error"] = "";
-            self::$Star["bool"] = false;
-            self::$Star["ip"] = $_SERVER["REMOTE_ADDR"];
-            self::$Star["security"] = [];
-            self::$Star["user"] = [];
-            self::$Star["action"] = "";
+            $this->Star["response"] = ["inhale"];
+            $this->Star["error"] = "";
+            $this->Star["bool"] = false;
+            $this->Star["ip"] = $_SERVER["REMOTE_ADDR"];
+            $this->Star["security"] = [];
+            $this->Star["user"] = [];
+            $this->Star["action"] = $_GET["method"];
+            $this->Star["send"] = [];
         }catch(PDOException $e){
             echo "<br>Star Setup Error<br>".$e;
             exit;
@@ -80,20 +80,28 @@ class Kirby
     }
 
     # Abbruch und Anzeige des Vorgangs
-    public static function Fail($error){
-        self::$Star->error = $error;
-        echo json_encode(self::$Star, JSON_PRETTY_PRINT);
+    public function Fail($error){
+        $this->Star["error"] = $error;
+        echo json_encode($this->Star, JSON_PRETTY_PRINT);
         exit;
     }
 
     # Hinzufügen von Statusmeldung
-    public static function Response($response){
-        self::$Star->response[count(self::$Star->response)] = $response;
+    public function Response($response){
+        $this->Star["response"][count($this->Star["response"])] = $response;
     }
 
-    public static function hello()
-    {
-        echo json_encode(self::$Star, JSON_PRETTY_PRINT);
+    public function Pretty(){
+        if ($this->Star["action"] != "login") unset($this->Star["authkey"]);
+        if ($this->Star["action"] != "get") unset($this->Star["user"]);
+        unset($this->Star["security"]);
+        unset($this->Star["error"]);
+        unset($this->Star["ip"]);
+    }
+
+    public function Spit(){
+        $this->Star["bool"] = true;
+        echo json_encode($this->Star, JSON_PRETTY_PRINT);
         exit;
     }
 }

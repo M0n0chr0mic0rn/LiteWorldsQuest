@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Diagnosis</title>
+
+    <script defer>
+        var API ="https://liteworlds.quest/?method="
+
+        async function Diag() {
+            const authkey = document.getElementById("authkey").value
+            const response = await (await fetch(API + "get", {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": JSON.stringify({
+                    "authkey": authkey
+                })
+            })).text()
+            console.log(response)
+        }
+    </script>
+</head>
+<body>
+    <input id="authkey" type="text" placeholder="Authkey">
+    <br>
+    <br>
+    <button onclick="Diag()">Diag</button>
+</body>
+</html>

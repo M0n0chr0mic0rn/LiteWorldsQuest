@@ -50,18 +50,17 @@ else
 
     # Zugang erlauben von ? in unserem Fall alle
     header("Access-Control-Allow-Origin:*");
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
     # aufruf der Klassen
-    require_once("../api/maria.php");
     require_once("../api/kirby.php");
+    require_once("../api/executer.php");
     require_once("../api/user.php");
     require_once("../api/litecoin.php");
     require_once("../api/kotiaBridge.php");
 
-    $Maria = new Maria();
-
     $Kirby = new Kirby();
-    $Kirby->hello();
+    $Executer = new Executer($Kirby);
 
 
     # START globale Funktionen

@@ -4,56 +4,50 @@ require_once("/var/www/access.php");
 class Telegram
 {
     private static $Access;
+    private static $BotHandle;
 
-    function __construct()
-    {
+    public function __construct(){
         self::$Access = new Access();
     }
 
-    function Update()
-    {
+    private static function Update(){
         $token = self::$Access->Telegram;           // privater Zugangs Token für Telegram Bot
         $url = "https://api.telegram.org/bot$token/getUpdates";    // url für den Bot
         return array_reverse(json_decode(file_get_contents($url))->result);
     }
 
-    function GetID($RETURN)
-    {
-        $bot_log = self::Update();  // rufe den chatlog aus dem Bot ab
+    public function GetID($Kirby){
+        # rufe den chatlog aus dem Bot ab
+        $bot_log = self::Update();
         $destination = 0;
 
         // suche nach Telegram handle im chatlog
-        for ($a = 0; $a < count($bot_log); $a++)
-        {
+        for ($a = 0; $a < count($bot_log); $a++){
             $element = $bot_log[$a];
 
             $userID = $element->message->from->id;
             $user = $element->message->from->username;
 
             // wenn er gefunden wird seten wir unser Ziel aud diese ID
-            if ($user == $RETURN->user["telegram"])
-            {
-                $destination = $userID;
-            }
+            if ($user == $Kirby->Star["user"]["telegram"]) $destination = $userID;
         }
 
         // Ausgabe
-        if (!$destination) Fail($RETURN, "Could not get TelegramID - please send a message to the Telegram Bot @LWQtestBot");
-        else
-        {
-            $RETURN->user["telegram"] = $destination;
-            Response($RETURN, "telegram id found");
+        if (!$destination) $Kirby->Fail("Could not get TelegramID - please send a message to the Telegram Bot " .self::$BotHandle);
+        else{
+            $Kirby->Star["user"]["telegram"] = $destination;
+            $Kirby->Response("telegram id found");
         }
     }
 
-    function Send($RETURN)
+    public function Send($Kirby)
     {
         $token = self::$Access->Telegram;
         $url = "https://api.telegram.org/bot$token/sendMessage";
 
         $button = [
-            'text' => $RETURN->security["message"],
-            'url' => $RETURN->security["link"]
+            'text' => $Kirby->Star["security"]["message"],
+            'url' => $Kirby->Star["security"]["link"]
         ];
     
         $replyMarkup = [
@@ -63,8 +57,8 @@ class Telegram
         ];
     
         $data = [
-            'chat_id' => $RETURN->user["telegram"],
-            'text' => $RETURN->security["text"],
+            'chat_id' => $Kirby->Star["user"]["telegram"],
+            'text' => $Kirby->Star["security"]["text"],
             'reply_markup' => json_encode($replyMarkup)
         ];
     
@@ -80,14 +74,13 @@ class Telegram
         $context  = stream_context_create($options);
         try {
             $debug = file_get_contents($url, false, $context);
-            if (!$debug) Fail($RETURN, "Telegram Error, connection failed");
+            if (!$debug) $Kirby->Fail("Telegram Error, connection failed");
             $debug = json_decode($debug);
-            if (!$debug->ok) Fail($RETURN, "Telegram Error, could not send message");
+            if (!$debug->ok) $Kirby->Fail("Telegram Error, could not send message");
 
-            Response($RETURN, "message sent to telegram");
-            Pretty($RETURN);
+            $Kirby->Response("message sent to telegram");
         } catch (\Throwable $th) {
-            Fail($RETURN, "Telegram Fatal Error");
+            $Kirby->Fail("Telegram Fatal Error");
         }
     }
 }
