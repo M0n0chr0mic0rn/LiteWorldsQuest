@@ -292,7 +292,7 @@ class Litecoin
         }
     }
 
-    private function _BuildInputCS($RETURN, $multi = 1)
+    private function _BuildInputC($RETURN, $multi = 1)
     {
         $RETURN->send["utxos"] = json_decode(Node($RETURN, "listunspent", [0,999999999,[$RETURN->send["origin"]]], $RETURN->user["name"]));
         $RETURN->send["input"] = array();
@@ -324,6 +324,10 @@ class Litecoin
         {
             case "dex-request":
                 $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexaccept", [$RETURN->send["token"], $RETURN->send["amount"]], $RETURN->user["name"]));
+            break;
+
+            case "token-send":
+                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_simplesend", [$RETURN->send["token"], $RETURN->send["amount"]], $RETURN->user["name"]));
             break;
         }
 
@@ -367,13 +371,8 @@ class Litecoin
                 self::_DEXlisting($RETURN);
                 $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexsell", [$RETURN->send["token"], $RETURN->send["amount"], $RETURN->send["desire"], 9, "0.000001", 3], $RETURN->user["name"]));
             break;
-
-            case "dex-request":
-                $RETURN->send["payload"] = str_replace("\"","", Node($RETURN, "omni_createpayload_dexaccept", [$RETURN->send["token"], $RETURN->send["amount"]], $RETURN->user["name"]));
-            break;
         }
 
-        
         $RETURN->send["txhex"] = str_replace("\"","", Node($RETURN, "createrawtransaction", [$RETURN->send["input"], $RETURN->send["output"]], $RETURN->user["name"]));
         $RETURN->send["txhexmod"] = str_replace("\"","", Node($RETURN, "omni_createrawtx_opreturn", [$RETURN->send["txhex"], $RETURN->send["payload"]], $RETURN->user["name"]));
         $RETURN->send["signedtxhex"] = json_decode(Node($RETURN, "signrawtransactionwithwallet", [$RETURN->send["txhexmod"]], $RETURN->user["name"]));
@@ -584,9 +583,20 @@ class Litecoin
         Done($RETURN);
     }
 
+    function TokenSend($RETURN)
+    {
+        if (!self::_BuildInputC($RETURN, 2)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildOutputC($RETURN, "token-send")) Fail($RETURN, "could not build output");
+
+        $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
+
+
+        Done($RETURN);
+    }
+
     function TokenList($RETURN)
     {
-        if (!self::_BuildInputCS($RETURN)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildInputC($RETURN)) Fail($RETURN, "collide at dust amount");
         if (!self::_BuildOutputCS($RETURN, "dex-list")) Fail($RETURN, "could not build output");
 
         $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
@@ -597,7 +607,7 @@ class Litecoin
 
     function TokenCancel($RETURN)
     {
-        if (!self::_BuildInputCS($RETURN)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildInputC($RETURN)) Fail($RETURN, "collide at dust amount");
         if (!self::_BuildOutputCS($RETURN, "dex-cancel")) Fail($RETURN, "could not build output");
 
         $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));
@@ -608,7 +618,7 @@ class Litecoin
 
     function TokenRequestPurchase($RETURN)
     {
-        if (!self::_BuildInputCS($RETURN, 2)) Fail($RETURN, "collide at dust amount");
+        if (!self::_BuildInputC($RETURN, 2)) Fail($RETURN, "collide at dust amount");
         if (!self::_BuildOutputC($RETURN, "dex-request")) Fail($RETURN, "could not build output");
 
         $RETURN->send["txid"] = json_decode(Node($RETURN, "sendrawtransaction", [$RETURN->send["signedtxhex"]->hex], $RETURN->user["name"]));

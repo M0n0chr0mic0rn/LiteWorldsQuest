@@ -8,6 +8,9 @@ class Bridge
     private static $_db_name = "Bridge";
     private static $_db;
 
+    private static $_BridgeAddress = "Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr";
+    private static $_OmniAddress = "MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p";
+
     function __construct()
     {
         try
@@ -92,6 +95,16 @@ class Bridge
         return false;
     }
 
+    private static function CheckAddressOUT($address)
+    {
+        $stmt = self::$_db->prepare("SELECT * FROM swapsOUT WHERE address=:address LIMIT 1");
+        $stmt->bindParam(":address", $address);
+        $stmt->execute();
+
+        if ($stmt->rowCount() == 0) return true;
+        return false;
+    }
+
     public static function CreateSwap($address, $amount, $index = 0)
     {
         $echo = [];
@@ -130,8 +143,39 @@ class Bridge
         $stmt->execute();
 
         $echo["answer"] = "Swap prepared";
-        $echo["address"] = $response["address"];
-        $echo["omni_address"] = $address;
+        $echo["pay_address"] = $response["address"];
+        $echo["receive_address"] = $address;
+        $echo["amount"] = $amount;
+        $echo["bool"] = true;
+        echo json_encode($echo, JSON_PRETTY_PRINT);
+
+        exit;
+    }
+
+    public static function CreateOUT($address, $amount)
+    {
+        $echo = [];
+
+        if (!self::CheckAddressOUT($address))
+        {
+            $echo["answer"] = "Swap with this Address already exists!";
+            $echo["bool"] = false;
+
+            echo json_encode($echo, JSON_PRETTY_PRINT);
+            exit;
+        }
+        
+        $time = time() + 60 * 60;
+
+        $stmt = self::$_db->prepare("INSERT INTO swapsOUT (address, amount, time) VALUES (:address, :amount, :time)");
+        $stmt->bindParam(":address", $address);
+        $stmt->bindParam(":amount", $amount);
+        $stmt->bindParam(":time", $time);
+        $stmt->execute();
+
+        $echo["answer"] = "Swap prepared";
+        $echo["pay_address"] = self::$_OmniAddress;
+        $echo["receive"] = $address;
         $echo["amount"] = $amount;
         $echo["bool"] = true;
         echo json_encode($echo, JSON_PRETTY_PRINT);

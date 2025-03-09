@@ -180,45 +180,4 @@ class litecoinBridge
         #$txid = $this->Node("sendrawtransaction", [$signed->hex]);
         #var_dump($txid);
     }
-
-    function test()
-    {
-        $utxos = json_decode($this->Node("listunspent", [0, 999990999, ["MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p"]]));
-
-        $input = [];
-        $amount = 0;
-        foreach ($utxos as $key => $utxo)
-        {
-            $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
-            $amount += $utxo->amount;
-        }
-
-        $output = [];
-        $output["MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p"] = $amount;
-
-        $payload = str_replace("\"", "", $this->Node("omni_createpayload_grant", [2147484191, "1.0", ""]));
-        #var_dump($payload);
-
-        $raw = str_replace("\"", "", $this->Node("createrawtransaction", [$input, $output]));
-        $modraw = str_replace("\"", "", $this->Node("omni_createrawtx_opreturn", [$raw, $payload]));
-        $signed = json_decode($this->Node("signrawtransactionwithwallet", [$modraw]));
-        $tx = json_decode($this->Node("decoderawtransaction", [$signed->hex]));
-        $weight = $tx->vsize * 3 / 100000000;
-
-        $output["MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p"] = number_format(($amount - $weight), 8, ".", "");
-        #var_dump($output);
-        $raw = str_replace("\"", "", $this->Node("createrawtransaction", [$input, $output]));
-        #var_dump($raw);
-        $modraw = str_replace("\"", "", $this->Node("omni_createrawtx_opreturn", [$raw, $payload]));
-        #var_dump($modraw);
-        $signed = json_decode($this->Node("signrawtransactionwithwallet", [$modraw]));
-        #var_dump($signed);
-        $txid = $this->Node("sendrawtransaction", [$signed->hex]);
-        var_dump($txid);
-    }
 }
-
-# Bridge Address - MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p
-
-$bridge = new litecoinBridge();
-$bridge->Grant("M85rZY37m5m5YxKKqbEhLVWEZYz8M9rz3L", 1.0);

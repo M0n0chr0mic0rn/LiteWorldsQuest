@@ -11,6 +11,7 @@ class cronBridge
     private static $_minSendingAmount = 0.000054;
     private static $_BridgeAddress = "Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr";
     private static $_OmniAddress = "MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p";
+    private static $_PropertyID = 2147484191;
 
     function __construct()
     {
@@ -163,25 +164,95 @@ class cronBridge
         return false;
     }
 
+    private static function Revoke($amount)
+    {
+        # Es wird immer die Bridgeaddresse benutzt um Token zu generieren oder zu wiederrufen
+        # UTXOs der Bridgeaddresse abfragen
+        $utxos = json_decode(self::Omni("listunspent", [0, 999990999, [self::$_OmniAddress]]));
+
+        # Input & Output Array erstellen
+        $input = [];
+        $output = [];
+
+        # Gesamtbetrag der UTXOs berechnen
+        $balance = 0;
+        foreach ($utxos as $key => $utxo)
+        {
+            $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
+            $balance += $utxo->amount;
+        }
+
+        # amount muss als String übergeben werden
+        $amount = number_format($amount, 8, ".", "");
+
+        # payload erstellen
+        $payload = str_replace("\"", "", self::Omni("omni_createpayload_revoke", [2147484191, $amount, ""]));
+
+        # Output definieren
+        $output[self::$_OmniAddress] = number_format($balance, 8, ".", "");
+
+        # Raw Transaction erstellen
+        $raw = str_replace("\"", "", self::Omni("createrawtransaction", [$input, $output]));
+
+        # OP_RETURN hinzufügen
+        $modraw = str_replace("\"", "", self::Omni("omni_createrawtx_opreturn", [$raw, $payload]));
+
+        # Transaktion signieren
+        $signed = json_decode(self::Omni("signrawtransactionwithwallet", [$modraw]));
+
+        # Transaktion auslesen
+        $tx = json_decode(self::Omni("decoderawtransaction", [$signed->hex]));
+
+        # Transaktionsgewicht berechnen
+        $weight = $tx->vsize * 3 / 100000000;
+
+        # Netzwerkgebühr für die Transaktion von der Bridgeaddresse abziehen
+        $output[self::$_OmniAddress] = number_format(((float)$output[self::$_OmniAddress] - $weight), 8, ".", "");
+
+        # Raw Transaction erstellen
+        $raw = str_replace("\"", "", self::Omni("createrawtransaction", [$input, $output]));
+
+        # OP_RETURN hinzufügen
+        $modraw = str_replace("\"", "", self::Omni("omni_createrawtx_opreturn", [$raw, $payload]));
+
+        # Transaktion signieren
+        $signed = json_decode(self::Omni("signrawtransactionwithwallet", [$modraw]));
+
+        # Transaktion senden
+        $txid = self::Omni("sendrawtransaction", [$signed->hex]);
+        #var_dump("Litecoin sagt", $signed);
+
+        if ($txid) return true;
+        return false;
+    }
+
     private static function Lock($input, $output)
     {
         $raw = str_replace("\"", "", self::Node("createrawtransaction", [$input, $output]));
         $signed = json_decode(self::Node("signrawtransaction", [$raw]));
         $tx = json_decode(self::Node("decoderawtransaction", [$signed->hex]));
 
-        $output[self::$_BridgeAddress] = number_format(((float)$output[self::$_BridgeAddress] - $tx->size / 10000000), 8, ".", "");
+        $output[self::$_BridgeAddress] = number_format(((float)$output[self::$_BridgeAddress] - (($tx->size +1) / 10000000)), 8, ".", "");
         $raw = str_replace("\"", "", self::Node("createrawtransaction", [$input, $output]));
         $signed = json_decode(self::Node("signrawtransaction", [$raw]));
+        #var_dump("Kotia sagt", $signed);
+        #return $signed->complete;
         $txid = json_decode(self::Node("sendrawtransaction", [$signed->hex]));
         var_dump(["KotiaTX"=>$txid]);
 
         if ($txid) return true;
         return false;
-
-        #var_dump("Kotia sagt", $signed);
     }
 
-    public static function CheckSwaps()
+    private static function DeleteSwap($swap)
+    {
+        $stmt = self::$_db->prepare("DELETE FROM swaps WHERE label=:label AND address=:address");
+        $stmt->bindParam(":label", $swap["label"]);
+        $stmt->bindParam(":address", $swap["address"]);
+        $stmt->execute();
+    }
+
+    public static function CheckSwapsIN()
     {
         # Zeit und progress definieren
         $time = time() + 60;
@@ -210,88 +281,79 @@ class cronBridge
             $output = [];
 
             $balance = 0;
-
             foreach ($utxos as $key => $utxo)
             {
                 $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
                 $balance += $utxo->amount;
+            }
+            $balance = number_format($balance, 8, ".", "");
 
-                if (number_format($balance, 8, ".", "") != $swap["amount"]) return false;
-
-                $output[self::$_BridgeAddress] = number_format($balance, 8, ".", "");
+            if ($balance == $swap["amount"])
+            {
+                $output[self::$_BridgeAddress] = $balance;
 
                 if (self::Lock($input, $output))
                 {
-                    if (self::Grant($swap["address"], $swap["amount"])) self::DeleteSwap($swap);
+                    if (self::Grant($swap["address"], $swap["amount"])); #self::DeleteSwap($swap);
                 }
             }
         }
+    }
 
-        
-        #var_dump($swaps);
-        #$address = json_decode(self::Node("getaddressesbyaccount", [$swaps["label"]]))[0];
-        #var_dump($address);
+    public static function CheckSwapsOut()
+    {
+        # Zeit und progress definieren
+        $time = time() + 60;
+        $progress = 0;
 
-        
-        
+        # Swaps abfragen
+        $stmt = self::$_db->prepare("SELECT * FROM swapsOUT WHERE progress = :progress AND time > :time");
+        $stmt->bindParam(":progress", $progress);
+        $stmt->bindParam(":time", $time);
+        $stmt->execute();
 
-        #var_dump($utxos);
+        # Wenn keine Swaps vorhanden sind, wird die Funktion beendet
+        if ($stmt->rowCount() < 1) return false;
 
-        
-        
+        # Swaps zwischenspeichern
+        $swaps = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        #$tx = json_decode(self::Node("getrawtransaction", [$utxos[0]->txid, 1]));
-        
-        
-        #var_dump($tx->time, $time);
+        foreach ($swaps as $key => $swap)
+        {
+            # für jedes Swap die Adresse und die UTXOs auslesen
+            #$address = json_decode(self::Node("getaddressesbyaccount", [$swap["label"]]))[0];
+            $utxos = json_decode(self::Node("listunspent", [0, 999999999, [self::$_BridgeAddress]]));
+            $token = json_decode(self::Omni("omni_getbalance", [self::$_OmniAddress, self::$_PropertyID]));
 
-        #if ($tx->confirmations == 0) return false;
+            var_dump($token);
 
-        #echo "Ready";
+            if ((float)$token->balance >= (float)$swap["amount"])
+            {
+                # Input und Output definieren
+                $input = [];
+                $output = [];
 
-        #$input = ["txid"=>$utxos[0]->txid, "vout"=>$utxos[0]->vout];
-        #$output = ["Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr"=>number_format($utxos[0]->amount, 8, ".", "")];
+                $balance = 0;
+                foreach ($utxos as $key => $utxo)
+                {
+                    $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
+                    $balance += $utxo->amount;
+                }
 
-        #$rawtx = str_replace("\"", "", self::Node("createrawtransaction", [[$input], $output]));
-        #var_dump($rawtx);
+                if ($balance > ((float)$swap["amount"] +1)) {
+                    $output[self::$_BridgeAddress] = number_format($balance - (float)$swap["amount"], 8, ".", "");
+                    $output[$swap["address"]] = $swap["amount"];
 
-        
-        
-
-        #$signtx = json_decode(self::Node("signrawtransaction", [$rawtx]));
-        #$tx = json_decode(self::Node("decoderawtransaction", [$signtx->hex]));
-
-        #$new_amount = (float)$output["Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr"] - $tx->size / 100000000 * 11;
-        #$dif = (float)$output["Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr"] - $new_amount;
-        #$dif = number_format($dif, 8, ".", "");
-        #var_dump($dif);
-
-        #$output["Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr"] = number_format($new_amount, 8, ".", "");
-
-        #$rawtx = str_replace("\"", "", self::Node("createrawtransaction", [[$input], $output]));
-        #var_dump($rawtx);
-
-        #$signtx = json_decode(self::Node("signrawtransaction", [$rawtx]));
-
-        #$tx = json_decode(self::Node("decoderawtransaction", [$signtx->hex]));
-        #var_dump($tx);
-
-        #$txid = json_decode(self::Node("sendrawtransaction", [$signtx->hex]));
-        #var_dump($txid);
-
-        #if (!$txid) return false;
-
-        #$progress = 1;
-
-        #$stmt = self::$_db->prepare("UPDATE swaps SET progress=:progress WHERE label=:label AND address=:address");
-        #$stmt->bindParam(":progress", $progress);
-        #$stmt->bindParam(":label", $swaps["label"]);
-        #$stmt->bindParam(":address", $swaps["address"]);
-        #$stmt->execute();
+                    if (self::Lock($input, $output))
+                    {
+                        if (self::Revoke($swap["amount"])); #self::DeleteSwap($swap);
+                    }
+                }
+            }
+        }
     }
 }
 
-# Bridge Address - Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr
-
 $do = new cronBridge();
-$do->CheckSwaps();
+$do->CheckSwapsIN();
+$do->CheckSwapsOUT();

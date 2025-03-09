@@ -13,7 +13,7 @@ async function OMNILITEget(address)
 
 async function OMNILITEtokens(address, container)
 {
-    const url = API + "ltcomni-get-token&address=" + address
+    const url = API + "ltcomni-get-balance-address&address=" + address
     let tokens
 
     const headline = document.createElement("h3")
@@ -25,6 +25,8 @@ async function OMNILITEtokens(address, container)
 
     try {
         tokens = await (await fetch(url)).json()
+
+        console.log(tokens);
         
         tokens.forEach(token => {
             console.log(token)
@@ -63,6 +65,12 @@ async function OMNILITEtokenOptions(address, token)
     _LitecoinWalletOptions.appendChild(send)
     send.classList.add("ButtonRed")
     send.innerText = "send to address"
+    send.onclick = function () {
+        document.getElementById("MASKsendltcomnitokenorigin").innerText = address
+        document.getElementById("MASKsendltcomnitokenid").innerText = token.propertyid
+        document.getElementById("MASKsendltcomnitokenname").innerText = token.name
+        Mask("sendltcomnitoken")
+    }
 
     const list = document.createElement("button")
     _LitecoinWalletOptions.appendChild(list)
@@ -409,4 +417,21 @@ function ShowQrCode(event, adr) {
     {
         canvas.remove()
     }
+}
+
+async function OMNILITEtokenSend()
+{
+    const origin = document.getElementById("MASKsendltcomnitokenorigin").innerHTML
+    const destination = document.getElementById("MASKsendltcomnitokendestination").value
+    const amount = document.getElementById("MASKsendltcomnitokenamount").value
+    const token = document.getElementById("MASKsendltcomnitokenid").innerHTML
+
+    const url = API + "ltcomni-token-send&token=" + token + "&amount=" + amount + "&origin=" + origin + "&destination=" + destination + "&authkey=" + AUTHKEY
+    console.log(url)
+    const response = await (await fetch(url)).json()
+
+    console.log(response)
+    response.name = USER.name
+    response.action = "ltcsend"
+    Terminal(response)
 }

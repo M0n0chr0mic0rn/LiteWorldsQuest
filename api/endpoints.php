@@ -172,6 +172,24 @@ switch ($_GET["method"])
         
     break;
 
+    case "ltcomni-token-send":
+        if (!isset($_GET["authkey"])) Fail($RETURN, "parameter \"authkey\" missing");
+        if (!isset($_GET["origin"])) Fail($RETURN, "parameter \"origin\" missing");
+        if (!isset($_GET["destination"])) Fail($RETURN, "parameter \"destination\" missing");
+        if (!isset($_GET["token"])) Fail($RETURN, "parameter \"token\" missing");
+        if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
+
+        $RETURN->send = array();
+        $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
+        $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
+        $RETURN->send["token"] = intval($_GET["token"]);
+        $RETURN->send["amount"] = number_format(floatval($_GET["amount"]), 8, ".", "");
+        $RETURN->send["networkfee"] = 3;
+
+        $USER->get($RETURN);
+        $LITECOIN->TokenSend($RETURN);
+    break;
+
     case "ltcomni-token-list":
         if (!isset($_GET["authkey"])) Fail($RETURN, "parameter \"authkey\" missing");
         if (!isset($_GET["origin"])) Fail($RETURN, "parameter \"origin\" missing");
@@ -252,12 +270,20 @@ switch ($_GET["method"])
         echo Node($RETURN, "omni_getnonfungibletokendata", [$property, $token]);
     break;
 
-    case "ltcomni-get-token":
+    case "ltcomni-get-balance-address":
         if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing");
 
         $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
 
         echo Node($RETURN, "omni_getallbalancesforaddress", [$address]);
+    break;
+
+    case "ltcomni-get-balance-token":
+        if (!isset($_GET["token"])) Fail($RETURN, "parameter \"token\" missing");
+
+        $token = intval($_GET["token"]);
+
+        echo Node($RETURN, "omni_getallbalancesforid", [$token]);
     break;
 
     # LITECOIN LiteWorlds
@@ -266,14 +292,17 @@ switch ($_GET["method"])
         echo Node($RETURN, "omni_getnonfungibletokens", ["MGTjUjDccbaCQZEyhFHDr1x9SAGwhyxa2L"]);
     break;
 
-    case "ltc-bridge-kotia":
-        if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing - Litecoin Omnilite receive Address");
+    case "ltc-bridge-kot":
+        if (!isset($_GET["destination"])) Fail($RETURN, "parameter \"destination\" missing - Litecoin Omnilite receive Address");
         if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
 
-        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
+        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
         $amount = number_format(floatval($_GET["amount"]), 8, ".", "");
+
+        if (substr($address, 0, 1) != "K") Fail($RETURN, "only swap to Kotia K Address type");
+        if ((float)$amount < 1.0) Fail($RETURN, "min amount 1.00000000 OmniKotia");
     
-        #$BRIDGE->CreateSwap($address, $amount);
+        $BRIDGE->CreateOut($address, $amount);
         Done($RETURN);
     break;
 
