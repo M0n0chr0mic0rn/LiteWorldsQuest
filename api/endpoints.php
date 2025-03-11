@@ -134,41 +134,35 @@ switch ($_GET["method"])
         if (!isset($_GET["amount"])) Fail($RETURN, "parameter \"amount\" missing");
         if (!isset($_GET["destination"])) Fail($RETURN, "parameter \"destination\" missing");
 
+        # fange Eingaben auf
+        $RETURN->send = array();
+        $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
+        $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
+
+        if (isset($_GET["networkfee"])) $RETURN->send["networkfee"] = floatval($_GET["networkfee"]);
+        else $RETURN->send["networkfee"] = 3;
+        
         if ($_GET["amount"] == "all")
         {
-            # fange Eingaben auf
-            $RETURN->send = array();
-            $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
-            $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
             $RETURN->send["amount"] = 0;
-
-            if (isset($_GET["networkfee"])) $RETURN->send["networkfee"] = floatval($_GET["networkfee"]);
-            else $RETURN->send["networkfee"] = 3;
-
             $RETURN->send["servicefee"] = false;
 
             $USER->get($RETURN, true);
             $LITECOIN->SendfromAddressAll($RETURN);
-            DoneLTC($RETURN);
         }
         else
         {
-            # fange Eingaben auf
-            $RETURN->send = array();
-            $RETURN->send["origin"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["origin"]);
-            $RETURN->send["amount"] = preg_replace( "/[^0-9.]/", "", $_GET["amount"]);
-            $RETURN->send["destination"] = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["destination"]);
-
-            if (isset($_GET["networkfee"])) $RETURN->send["networkfee"] = floatval($_GET["networkfee"]);
-            else $RETURN->send["networkfee"] = 3;
+            $RETURN->send["amount"] = floatval(preg_replace( "/[^0-9.]/", "", $_GET["amount"]));
 
             if (isset($_GET["fee"])) $RETURN->send["servicefee"] = true;
             else $RETURN->send["servicefee"] = false;
 
             $USER->get($RETURN, true);
             $LITECOIN->SendfromAddress($RETURN);
-            DoneLTC($RETURN);
         }
+
+        
+        DoneLTC($RETURN);
         
     break;
 

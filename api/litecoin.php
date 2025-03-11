@@ -503,20 +503,30 @@ class Litecoin
 
         $RETURN->send["output"] = array();
 
-        $RETURN->send["change"] = $RETURN->send["liquidity"] - $RETURN->send["amount"] - self::$_ServiceFee;
-        if ($RETURN->send["change"] < self::$_minSendingAmount) Fail($RETURN, "dust error");
+        
 
         if ($RETURN->send["servicefee"])
         {
+            $RETURN->send["change"] = $RETURN->send["liquidity"] - $RETURN->send["amount"] - self::$_ServiceFee;
+            if ($RETURN->send["change"] < self::$_minSendingAmount) Fail($RETURN, "dust error");
+
             $RETURN->send["output"][$RETURN->send["origin"]] = number_format($RETURN->send["change"], 8, ".", "");
             $RETURN->send["output"][self::_ServiceFeeDestination()] = number_format(self::$_ServiceFee, 8, ".", "");
         }
         else
         {
-            $RETURN->send["output"][$RETURN->send["origin"]] = number_format(($RETURN->send["change"] + self::$_ServiceFee), 8, ".", "");
+            $RETURN->send["change"] = $RETURN->send["liquidity"] - $RETURN->send["amount"];
+            if ($RETURN->send["change"] < self::$_minSendingAmount) Fail($RETURN, "dust error");
+
+            $RETURN->send["output"][$RETURN->send["origin"]] = number_format(($RETURN->send["change"]), 8, ".", "");
         }
-        
-        $RETURN->send["output"][$RETURN->send["destination"]] = number_format($RETURN->send["amount"], 8, ".", "");
+
+        if ([$RETURN->send["origin"]] == [$RETURN->send["destination"]]) # self transction
+        {
+            $RETURN->send["output"][$RETURN->send["destination"]] = number_format((float)$RETURN->send["output"][$RETURN->send["destination"]] + $RETURN->send["amount"], 8, ".", "");
+        } else {
+            $RETURN->send["output"][$RETURN->send["destination"]] = number_format($RETURN->send["amount"], 8, ".", "");
+        }
 
         self::_BuildOutputA($RETURN);
         Response($RETURN, "build output");

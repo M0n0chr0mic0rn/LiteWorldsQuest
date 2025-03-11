@@ -11,6 +11,9 @@ class Bridge
     private static $_BridgeAddress = "Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr";
     private static $_OmniAddress = "MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p";
 
+    private static $_BridgeFeeLTC = 0.00025;    # fee to cover the grant costs
+    private static $_BridgeFee = 0.00025;       # adjust with your common networkfee
+
     function __construct()
     {
         try
@@ -109,6 +112,8 @@ class Bridge
     {
         $echo = [];
 
+        $amount += self::$_BridgeFee; 
+
         if (!self::CheckAddress($address))
         {
             $echo["answer"] = "Swap with this Address already exists!";
@@ -143,9 +148,11 @@ class Bridge
         $stmt->execute();
 
         $echo["answer"] = "Swap prepared";
-        $echo["pay_address"] = $response["address"];
+        $echo["pay_address_kotia"] = $response["address"];
+        $echo["amount_kotia"] = $amount;
+        $echo["pay_address_omnilite"] = self::$_OmniAddress;
+        $echo["amount_litecoin"] = number_format(self::$_BridgeFeeLTC, 5, ".", "");
         $echo["receive_address"] = $address;
-        $echo["amount"] = $amount;
         $echo["bool"] = true;
         echo json_encode($echo, JSON_PRETTY_PRINT);
 

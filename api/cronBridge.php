@@ -12,6 +12,7 @@ class cronBridge
     private static $_BridgeAddress = "Kfq52oVxADcsZXCXi7P2N5gxFVCkRzZNKr";
     private static $_OmniAddress = "MBTCfZJKcW5M2R5BfQPtcKM2J53fkFKy7p";
     private static $_PropertyID = 2147484191;
+    private static $_BridgeKey = -0.00025;
 
     function __construct()
     {
@@ -100,26 +101,55 @@ class cronBridge
         return json_encode(json_decode($response, true)["result"], JSON_PRETTY_PRINT);
     }
 
-    private static function Grant($destination, $amount)
+    private static function _bridgeOpen($origin)
+    {
+        $utxos = json_decode(self::Omni("listunspent", [0, 999999999, [self::$_OmniAddress]]));
+
+        # Rückgabewert
+        $result;
+
+        $open = false;
+        foreach ($utxos as $key => $utxo)
+        {
+            $tx = json_decode(self::Omni("gettransaction", [$utxo->txid]));
+            $tx = json_decode(self::Omni("decoderawtransaction", [$tx->hex]));
+            #var_dump("TX#".$key);
+            #var_dump($tx);
+
+            foreach ($tx->vout as $key => $output) {
+                #var_dump($output);
+                if (isset($output->scriptPubKey->addresses)) {
+                    if ($output->scriptPubKey->addresses[0] == self::$_OmniAddress && self::$_BridgeKey <= $output->value)
+                    {
+                        foreach ($tx->vin as $key => $rawInput) {
+                            $prevTX = json_decode(self::Omni("getrawtransaction", [$rawInput->txid, 1]));
+                            #var_dump($prevTX);
+
+                            if ($prevTX->vout[$rawInput->vout]->scriptPubKey->addresses[0] == $origin)
+                            {
+                                $open = true;
+                                $result = ["txid" => $utxo->txid, "vout" => $utxo->vout, "amount" => $utxo->amount];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($open) return $result;
+        return false;
+    }
+
+    private static function Grant($destination, $amount, $utxo)
     {
         # Es wird immer die Bridgeaddresse benutzt um Token zu generieren oder zu wiederrufen
         # UTXOs der Bridgeaddresse abfragen
-        $utxos = json_decode(self::Omni("listunspent", [0, 999999999, [self::$_OmniAddress]]));
 
         # Input & Output Array erstellen
-        $input = [];
+        $input = [["txid" => $utxo["txid"], "vout" => $utxo["vout"]]];
         $output = [];
-
-        # Gesamtbetrag der UTXOs berechnen
-        $balance = 0;
-        foreach ($utxos as $key => $utxo)
-        {
-            $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
-            $balance += $utxo->amount;
-        }
-
-        # amount muss als String übergeben werden
-        $balance = number_format($balance, 8, ".", "");
+        
+        $balance = number_format($utxo["amount"], 8, ".", "");
 
         # payload erstellen
         $payload = str_replace("\"", "", self::Omni("omni_createpayload_grant", [2147484191, $amount, ""]));
@@ -220,7 +250,7 @@ class cronBridge
 
         # Transaktion senden
         $txid = self::Omni("sendrawtransaction", [$signed->hex]);
-        #var_dump("Litecoin sagt", $signed);
+        var_dump("Litecoin sagt", $txid);
 
         if ($txid) return true;
         return false;
@@ -239,7 +269,6 @@ class cronBridge
         #return $signed->complete;
         $txid = json_decode(self::Node("sendrawtransaction", [$signed->hex]));
         var_dump(["KotiaTX"=>$txid]);
-
         if ($txid) return true;
         return false;
     }
@@ -247,6 +276,14 @@ class cronBridge
     private static function DeleteSwap($swap)
     {
         $stmt = self::$_db->prepare("DELETE FROM swaps WHERE label=:label AND address=:address");
+        $stmt->bindParam(":label", $swap["label"]);
+        $stmt->bindParam(":address", $swap["address"]);
+        $stmt->execute();
+    }
+
+    private static function DeleteSwapOUT($swap)
+    {
+        $stmt = self::$_db->prepare("DELETE FROM swapsOUT WHERE label=:label AND address=:address");
         $stmt->bindParam(":label", $swap["label"]);
         $stmt->bindParam(":address", $swap["address"]);
         $stmt->execute();
@@ -270,32 +307,43 @@ class cronBridge
         # Swaps zwischenspeichern
         $swaps = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        #var_dump($swaps);
+
         foreach ($swaps as $key => $swap)
         {
-            # für jedes Swap die Adresse und die UTXOs auslesen
-            $address = json_decode(self::Node("getaddressesbyaccount", [$swap["label"]]))[0];
-            $utxos = json_decode(self::Node("listunspent", [1, 999999999, [$address]]));
+            # Wurde die Litecoin Fee schon bezahlt?
+            $inputOmni = self::_bridgeOpen($swap["address"]);
+            if ($inputOmni) {
+                # für jedes Swap die Adresse und die UTXOs auf Kotia auslesen
+                $address = json_decode(self::Node("getaddressesbyaccount", [$swap["label"]]))[0];
+                $utxos = json_decode(self::Node("listunspent", [1, 999999999, [$address]]));
 
-            # Input und Output definieren
-            $input = [];
-            $output = [];
+                # Input und Output für Kotia definieren
+                $input = [];
+                $output = [];
 
-            $balance = 0;
-            foreach ($utxos as $key => $utxo)
-            {
-                $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
-                $balance += $utxo->amount;
-            }
-            $balance = number_format($balance, 8, ".", "");
-
-            if ($balance == $swap["amount"])
-            {
-                $output[self::$_BridgeAddress] = $balance;
-
-                if (self::Lock($input, $output))
+                $balance = 0;
+                foreach ($utxos as $key => $utxo)
                 {
-                    if (self::Grant($swap["address"], $swap["amount"])); #self::DeleteSwap($swap);
+                    $input[$key] = ["txid" => $utxo->txid, "vout" => $utxo->vout];
+                    $balance += $utxo->amount;
                 }
+                $balance = number_format($balance, 8, ".", "");
+                #var_dump($balance);
+
+                if ($swap["amount"] <= $balance)
+                {
+                    $output[self::$_BridgeAddress] = $balance;
+
+                    if (self::Lock($input, $output))
+                    {
+                        if (self::Grant($swap["address"], $swap["amount"], $inputOmni)); self::DeleteSwap($swap);
+                    }
+                } else {
+                    echo "Waiting for payment";
+                }
+            } else {
+                echo "Missing BridgeKey";
             }
         }
     }
@@ -346,9 +394,13 @@ class cronBridge
 
                     if (self::Lock($input, $output))
                     {
-                        if (self::Revoke($swap["amount"])); #self::DeleteSwap($swap);
+                        if (self::Revoke($swap["amount"])); self::DeleteSwapOUT($swap);
                     }
+                } else {
+                    echo "Bridge Holdings Low";
                 }
+            } else {
+                echo "Waiting for Tokens";
             }
         }
     }
