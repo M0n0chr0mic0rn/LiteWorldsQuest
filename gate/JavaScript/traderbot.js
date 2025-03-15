@@ -1,285 +1,117 @@
-function TRADERBOThomeview()
-{
-    const tb = TRADERBOT
-    const array = []
+TraderBotHome()
+function TraderBotHome() {
+    const dummy = document.getElementById("nft")
+    dummy.remove()
+    let index = 0
 
-    shuffle(tb)
-
-    for (let a = 0; a < 12; a++)
-    {
-        shuffle(tb[a].tokens)
-        array[a] = tb[a].propertyid + "#" + tb[a].tokens[0].tokenstart
-    }
-
-    return array
-}
-async function TRADERBOTprintHome(field)
-{
-    await Promise.all(field.map(async(task) => 
-    {
-        //console.log(task)
-        const a = task.split("#")
-        TRADERBOTcreateCard(a[0], a[1])
-        
-    }))
-    /*for (let a = 0; a < 12; a++)
-    {
-        TRADERBOTcreateCard(Object.keys(field)[a], Object.values(field)[a])
-    }*/
-}
-async function TRADERBOTgenesis()
-{
-    const url = API + "ltc-trader-get"
-    TRADERBOT = await (await fetch(url)).json()
-
-    //console.log(TRADERBOT)
-
-    const homeview = TRADERBOThomeview()
-    //console.log(homeview)
-
-
-    TRADERBOTprintHome(homeview)
+    setTimeout(()=>{
+        _Omnilite.TraderBotGet().then(trader => {
+            trader.forEach(property => {
+                property.tokens.forEach(tokenrange => {
+                    for (let a = tokenrange.tokenstart; a <= tokenrange.tokenstart; a++) {
+                        index++
+                        setTimeout(() => {
+                            _Omnilite.NFTget(property.propertyid, a).then(nft => {
+                                TraderBotPin(dummy, nft[0], property.propertyid)
+                            })
+                        }, parseInt(index) * 50)
+                    }
+                })
+            })
+        })        
+    }, 1000)
 }
 
-async function TRADERBOTcreateCard(property, token)
-{
-    const seal = property + "#" + token
-    const url = API + "ltc-nft-get&property=" + property+ "&token=" + token
-    const nft = (await (await fetch(url)).json())[0]
-    const card = document.createElement("div")
-    card.classList.add("nft-card")
-    _HomeTraderBot.appendChild(card)
+function TraderBotPin(dummy, nft, property) {
+    let grantdata, holderdata, name, description, desire, ID, pass
 
-    nft.grantdata = nft.grantdata.replaceAll("{'", "{\"")
-    nft.grantdata = nft.grantdata.replaceAll("'}", "\"}")
-    nft.grantdata = nft.grantdata.replaceAll("':'", "\":\"")
-    nft.grantdata = nft.grantdata.replaceAll("','", "\",\"")
+    grantdata = nft.grantdata
+    grantdata = grantdata.replaceAll("{'", '{"')
+    grantdata = grantdata.replaceAll("'}", '"}')
+    grantdata = grantdata.replaceAll("':'", '":"')
+    grantdata = grantdata.replaceAll("','", '","')
+
+    holderdata = nft.holderdata
+    pass = false
+    valid = true
 
     try {
-        const grantdata = JSON.parse(nft.grantdata)
-        const holderdata = JSON.parse(nft.holderdata)
+        grantdata = JSON.parse(grantdata)
+        if (holderdata != "") holderdata = JSON.parse(holderdata)
+        else valid = false
 
-        if (grantdata.hasOwnProperty("structure")) // LiteWorlds
-        {
-            TRADERBOTliteworlds(card, seal, grantdata, holderdata)
-        }
-        else if (grantdata.hasOwnProperty("image")) // LiteVerse
-        {
-            TRADERBOTliteverse(card, seal, grantdata, holderdata)
-        }
-        else // Custom
-        {
-            
-        }
+        name = grantdata.name
+        //description = grantdata.description
+        desire = holderdata.desire
+        ID = property + "#" + nft.index
+        pass = true
     } catch (error) {
-        console.log("TRADERBOTcraeteCARD: JSON decode Error")
     }
-    
-}
 
-async function TRADERBOTliteworlds(card, seal, grantdata, holderdata)
-{
-    const card_image = document.createElement("div")
-    const image = document.createElement("img")
-    const audio = document.createElement("audio")
-    const video = document.createElement("video")
-    const source_wav = document.createElement("source")
-    const source_mp3 = document.createElement("source")
-    const source_mp4 = document.createElement("source")
+    if (!valid) throw "missing holderdata"
 
-    const card_detail = document.createElement("div")
-    const sealspan = document.createElement("span")
-    const name = document.createElement("span")
-    const description = document.createElement("span")
-    const desire = document.createElement("span")
+    if (pass) {
+        NFTcard = dummy.cloneNode(true)
+        NFTcard.id = "nft#" + ID
+        document.getElementById("traderbothome").appendChild(NFTcard)
 
-    card.appendChild(card_image)
-    card_image.appendChild(image)
+        document.getElementById("nft#" + ID).children[1].children[0].innerHTML = ID + " @ " + desire + "LTC"
+        document.getElementById("nft#" + ID).children[1].children[1].innerHTML = name
 
-    card.appendChild(card_detail)
-    card_detail.appendChild(sealspan)
-    card_detail.appendChild(document.createElement("br"))
-    card_detail.appendChild(name)
-    card_detail.appendChild(document.createElement("br"))
-    card_detail.appendChild(description)
-    card_detail.appendChild(document.createElement("br"))
-    card_detail.appendChild(desire)
+        const video = document.createElement("video")
+        const source = document.createElement("source")
+        video.controls = true
 
-    audio.controls = true
-    audio.style.width = "95%"
+        if (grantdata.hasOwnProperty("image") && grantdata.hasOwnProperty("name") && grantdata.hasOwnProperty("description") && grantdata.hasOwnProperty("attributes")) {
+            fetch(_IPFS + grantdata.image.split("ipfs://")[1]).then(response => response.blob()).then(blob => {
+                document.getElementById("nft#" + ID).children[0].src = URL.createObjectURL(blob)
+                document.getElementById("nft#" + ID).style.boxShadow = "0 2px 4px rgba(21, 226, 49, 0.6)"
 
-    video.controls = true
-    video.style.width = "95%"
-    video.style.height = "95%"
+                if (blob.type.startsWith("audio/") || blob.type.startsWith("video/")) {
+                    source.src = URL.createObjectURL(blob)
+                    video.appendChild(source)
+                    document.getElementById("nft#" + ID).replaceChild(video, document.getElementById("nft#" + ID).children[0])
+                }
+            })
+        }
 
-    source_wav.type = "audio/wav"
-    source_mp3.type = "audio/mp3"
-    source_mp4.type = "video/mp4"
-
-    card_image.classList.add("nft-image")
-    
-    image.alt = "Loading..."
-    image.style.display = "inline-block"
-
-    card_detail.classList.add("nft-details")
-    sealspan.classList.add("nft-seal")
-    desire.classList.add("desire")
-
-    sealspan.innerText = seal
-    sealspan.style.color = "deepskyblue"
-
-    name.innerText = grantdata.name
-    if (grantdata.hasOwnProperty("description")) description.innerText = grantdata.description
-    desire.innerText = holderdata.desire + " LTC"
-
-    let url
-    let blob
-    let blobURL
-
-    if (grantdata.structure == "epic")
-    {
-        if (grantdata.source == "ordinal")
-        {
-            url = ORDINAL + grantdata.content
+        if (grantdata.hasOwnProperty("structure") && grantdata.hasOwnProperty("source") && grantdata.hasOwnProperty("name") && grantdata.hasOwnProperty("type")) {
+            if (grantdata.structure == "epic" && grantdata.source == "ipfs")
+            {
+                document.getElementById("nft#" + ID).children[0].src = _IPFS + grantdata.content
+                document.getElementById("nft#" + ID).style.boxShadow = "0 3px 7px rgba(10, 191, 204, 0.6)"
+                
+                if (grantdata.type == "video" || grantdata.type == "audio") {
+                    source.src = _IPFS + grantdata.content
+                    video.appendChild(source)
+                    document.getElementById("nft#" + ID).replaceChild(video, document.getElementById("nft#" + ID).children[0])
+                }
+            }
             
+            if (grantdata.structure == "epic" && grantdata.source == "ordinal")
+            {
+                document.getElementById("nft#" + ID).children[0].src = _Ordinal + grantdata.content
+                document.getElementById("nft#" + ID).style.boxShadow = "0 3px 12px rgba(216, 20, 223, 0.6)"
+                
+                if (grantdata.type == "video" || grantdata.type == "audio") {
+                    source.src = _Ordinal + grantdata.content
+                    video.appendChild(source)
+                    document.getElementById("nft#" + ID).replaceChild(video, document.getElementById("nft#" + ID).children[0])
+                }
+            }
         }
 
-        if (grantdata.source == "ipfs")
+        if (grantdata.hasOwnProperty("structure") && grantdata.hasOwnProperty("json"))
         {
-            url = IPFS + grantdata.content
-        }
-    }
-
-    if (grantdata.structure == "artefactual" || grantdata.structure == "artifactual")
-    {
-        url = ORDINAL + grantdata.json
-        json = await (await fetch(url)).json()
-        console.log("ARTEFACT", json)
-
-        sealspan.style.color = "crimson"
-
-        name.innerText = json.data.name
-        if (json.data.hasOwnProperty("description")) description.innerText = json.data.description
-
-        url = ORDINAL + json.content[0]
-    }
-
-    blob = await (await fetch(url)).blob()
-    blobURL = URL.createObjectURL(blob)
-
-    if (blob.type.includes("image"))
-    {
-        image.src = blobURL
-
-        image.onload = function()
-        {
-            URL.revokeObjectURL(blobURL)
-        }
-    }
-    if (blob.type.includes("audio") || blob.type.includes("video"))
-    {
-        image.remove()
-
-        source_mp3.src = blobURL
-        source_mp4.src = blobURL
-        source_wav.src = blobURL
-
-        if (blob.type.includes("mp3")) video.appendChild(source_mp3)
-        if (blob.type.includes("mp4")) video.appendChild(source_mp4)
-        if (blob.type.includes("wav")) video.appendChild(source_wav)
-
-        card_image.appendChild(video)
-        video.load()
-
-        video.oncanplaythrough = function()
-        {
-            URL.revokeObjectURL(blobURL)
-        }
-    }
-}
-
-async function TRADERBOTliteverse(card, seal, grantdata, holderdata)
-{
-    const url = IPFS + grantdata.image.split("ipfs://")[1]
-    const blob = await (await fetch(url)).blob()
-    const blobURL = URL.createObjectURL(blob)
-    const card_image = document.createElement("div")
-    const image = document.createElement("img")
-    const audio = document.createElement("audio")
-    const video = document.createElement("video")
-    const source_wav = document.createElement("source")
-    const source_mp3 = document.createElement("source")
-    const source_mp4 = document.createElement("source")
-
-    audio.controls = true
-    audio.style.width = "95%"
-
-    video.controls = true
-    video.style.width = "95%"
-    video.style.height = "95%"
-
-    source_wav.type = "audio/wav"
-    source_mp3.type = "audio/mp3"
-    source_mp4.type = "video/mp4"
-
-
-    card_image.classList.add("nft-image")
-    card.appendChild(card_image)
-    card_image.appendChild(image)
-    image.alt = "Loading..."
-    image.style.display = "inline-block"
-
-    const card_detail = document.createElement("div")
-    const sealspan = document.createElement("span")
-    const name = document.createElement("span")
-    const description = document.createElement("span")
-    const desire = document.createElement("span")
-
-    card_detail.classList.add("nft-details")
-    sealspan.classList.add("nft-seal")
-    desire.classList.add("desire")
-
-    card.appendChild(card_detail)
-    card_detail.appendChild(sealspan)
-    card_detail.appendChild(document.createElement("br"))
-    card_detail.appendChild(name)
-    card_detail.appendChild(document.createElement("br"))
-    card_detail.appendChild(description)
-    card_detail.appendChild(document.createElement("br"))
-    card_detail.appendChild(desire)
-
-    sealspan.innerText = seal
-    sealspan.style.color = "gold"
-
-    name.innerText = grantdata.name
-    description.innerText = grantdata.description
-    desire.innerText = holderdata.desire + " LTC"
-
-    if (blob.type.includes("image"))
-    {
-        image.src = blobURL
-
-        image.onload = function()
-        {
-            URL.revokeObjectURL(blobURL)
-        }
-    }
-    if (blob.type.includes("audio"))
-    {
-        image.remove()
-
-        source_mp3.src = blobURL
-        source_wav.src = blobURL
-
-        if (blob.type.includes("mp3")) audio.appendChild(source_mp3)
-        if (blob.type.includes("wav")) audio.appendChild(source_wav)
-
-        card_image.appendChild(audio)
-        audio.load()
-
-        audio.oncanplaythrough = function()
-        {
-            URL.revokeObjectURL(blobURL)
+            if (grantdata.structure == "artefactual" || grantdata.structure == "artifactual")
+            {
+                fetch(_Ordinal + grantdata.json).then((response) => response.json()).then(function(data){
+                    document.getElementById("nft#" + ID).children[0].src = _Ordinal + data.content[0]
+                    document.getElementById("nft#" + ID).children[1].children[0].innerHTML = ID + " @ " + desire + "LTC"
+                    document.getElementById("nft#" + ID).children[1].children[1].innerHTML = data.data.name
+                    document.getElementById("nft#" + ID).style.boxShadow = "0 4px 16px rgba(223, 66, 18, 0.7)"
+                })
+            }
         }
     }
 }

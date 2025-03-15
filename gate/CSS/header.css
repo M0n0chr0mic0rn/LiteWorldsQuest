@@ -1,0 +1,147 @@
+
+/* Header-Styles */
+header {
+    width: 100dvw; /* Volle Breite */
+    height: 5rem; /* Feste Höhe */
+    background: #111; /* Dunkler Hintergrund */
+    color: white;
+    display: flex;
+    align-items: center; /* Korrigiert: 'right' gibt es nicht, 'center' macht mehr Sinn */
+    justify-content: center; /* Zentriert den Inhalt */
+    padding: 0 1.25rem;
+    box-shadow: 0 0.125rem 0.3125rem rgba(0, 0, 0, 0.2);
+    position: fixed; /* Header bleibt immer oben */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Damit der Header über allem bleibt */
+}
+
+/* Licht-Animation */
+header::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.25) 50%, 
+        rgba(255, 255, 255, 0) 100%);
+    animation: lightSweep 150s infinite linear;
+}
+
+@keyframes lightSweep {
+    0% {
+        left: -50%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Header Name Styling mit kontinuierlich fließendem Farbverlauf */
+header b {
+    position: absolute;
+    left: 1.37rem;
+    margin-top: 1rem;
+    font-size: clamp(2.4rem, 4vw, 3.1415rem);
+    font-weight: bold;
+    font-family: monospace;
+    background: linear-gradient(90deg, #00ffff, #00ff00, #ffff00, #ff69b4, #00ffff);
+    -webkit-background-clip: text; /* Hintergrund nur im Textbereich anwenden */
+    background-clip: text; /* Für den Farbverlauf im Text */
+    color: transparent; /* Textfarbe transparent, damit der Verlauf sichtbar wird */
+    display: inline-block; /* Für eine saubere Darstellung des Textes */
+    background-size: 200% 100%; /* Ein kleinerer Hintergrund, aber immer noch genügend für die fließende Bewegung */
+    animation: gradientMove 8s linear infinite; /* Langsame, fließende Animation */
+    cursor:progress;
+    z-index: 100;
+}
+
+/* Keyframes für die Bewegung des Farbverlaufs im Text */
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 0%; /* Startposition */
+    }
+    100% {
+        background-position: 200% 0%; /* Ende der Animation, der Verlauf bewegt sich weiter */
+    }
+}
+
+/* Menü-Container */
+.navbar {
+    position: absolute;
+    right: 5rem;
+    top: 60%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 1rem;
+    z-index: 1000; /* Sicherstellen, dass es vor allem anderen ist */
+}
+
+/* Menü-Item (ein Button mit Dropdown) */
+.nav-item {
+    position: relative; /* Wichtig für die korrekte Positionierung des Dropdowns */
+}
+
+/* Hauptbuttons */
+.nav-item button {
+    background: none;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    border: none;
+    border-radius: 0.5rem;
+    transition: background 0.3s ease-in-out;
+    width: 7.3rem;
+}
+
+/* Hover-Effekt */
+.nav-item button:hover {
+    background: #800000; /* Tiefes Rot */
+}
+
+/* Dropdown-Container */
+.nav-item .dropdown {
+    position: absolute;
+    top: 100%; /* Positioniert das Dropdown direkt unter dem Button */
+    left: 0;
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    display: flex;
+    flex-direction: column;
+    z-index: 1002; /* Stellt sicher, dass es vor allem anderen liegt */
+    min-width: 100%;
+}
+
+/* Dropdown-Buttons */
+.nav-item .dropdown button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 0.5rem;
+    font-size: 1rem;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+/* Hover für Dropdown-Buttons */
+.nav-item .dropdown button:hover {
+    background: rgba(255, 0, 0, 0.5);
+}
+
+/* Dropdown sichtbar machen, wenn über den Button gehovt wird */
+.nav-item:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}

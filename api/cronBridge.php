@@ -150,6 +150,7 @@ class cronBridge
         $output = [];
         
         $balance = number_format($utxo["amount"], 8, ".", "");
+        $amount = number_format((float)$amount - 0.00025, 8, ".", "");
 
         # payload erstellen
         $payload = str_replace("\"", "", self::Omni("omni_createpayload_grant", [2147484191, $amount, ""]));
@@ -252,6 +253,8 @@ class cronBridge
         $txid = self::Omni("sendrawtransaction", [$signed->hex]);
         var_dump("Litecoin sagt", $txid);
 
+        self::_setProgress(2);
+
         if ($txid) return true;
         return false;
     }
@@ -273,6 +276,13 @@ class cronBridge
         return false;
     }
 
+    private static function _setProgress($progress) {
+        $stmt = self::$_db->prepare("UPDATE swapsOUT SET progress=:progress WHERE address=:address");
+        $stmt->bindParam(":progress", $progress);
+        $stmt->bindParam(":address", $swap["address"]);
+        $stmt->execute();
+    }
+
     private static function DeleteSwap($swap)
     {
         $stmt = self::$_db->prepare("DELETE FROM swaps WHERE label=:label AND address=:address");
@@ -283,8 +293,7 @@ class cronBridge
 
     private static function DeleteSwapOUT($swap)
     {
-        $stmt = self::$_db->prepare("DELETE FROM swapsOUT WHERE label=:label AND address=:address");
-        $stmt->bindParam(":label", $swap["label"]);
+        $stmt = self::$_db->prepare("DELETE FROM swapsOUT WHERE address=:address");
         $stmt->bindParam(":address", $swap["address"]);
         $stmt->execute();
     }
@@ -372,8 +381,6 @@ class cronBridge
             #$address = json_decode(self::Node("getaddressesbyaccount", [$swap["label"]]))[0];
             $utxos = json_decode(self::Node("listunspent", [0, 999999999, [self::$_BridgeAddress]]));
             $token = json_decode(self::Omni("omni_getbalance", [self::$_OmniAddress, self::$_PropertyID]));
-
-            var_dump($token);
 
             if ((float)$token->balance >= (float)$swap["amount"])
             {

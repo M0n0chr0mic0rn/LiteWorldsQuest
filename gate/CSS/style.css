@@ -1,0 +1,151 @@
+/* Standardmäßig unsichtbar */
+::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+    display: none; /* Scrollbar ausblenden */
+}
+
+/* Scrollbar aktivieren, wenn der Artikel gehovt wird */
+article:hover::-webkit-scrollbar {
+    display: block;
+}
+
+article::-webkit-scrollbar-thumb {
+    background: crimson;
+    border-radius: 10px;
+    border: 2px solid #222;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Sobald der Artikel gehovt wird, erscheint auch der Thumb */
+article:hover::-webkit-scrollbar-thumb {
+    opacity: 1;
+}
+
+/* Grundlayout für den Body */
+body {
+    display: flex;
+    flex-direction: column; /* Header + Main in einer vertikalen Anordnung */
+    height: 100dvh; /* Gesamte Bildschirmhöhe */
+    margin: 0;
+    font-family: 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Main-Styles */
+main {
+    flex-grow: 1; /* Main füllt den restlichen Platz */
+    background: #222; /* Hintergrund für Main */
+    padding-top: 5rem; /* Gleiche Höhe wie der Header, damit der Inhalt nicht unter den Header rutscht */
+    box-sizing: border-box;
+    overflow: hidden; /* Verhindert Überlauf */
+    position: relative;
+    z-index: 1;
+}
+
+/* Section, die die Artikel enthält */
+section {
+    display: none;
+    justify-content: space-between; /* Verteilung der Artikel nebeneinander */
+    gap: 20px;
+    flex-wrap: wrap; /* Damit Artikel auch auf kleineren Bildschirmen umgebrochen werden können */
+    height: 100%;
+}
+
+/* Artikel-Styles */
+article {
+    background: #444;
+    color: white;
+    flex: 1 1 30%;
+    padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: all 0.5s ease;
+    border: 5px solid transparent; /* Anfangs unsichtbarer Rand */
+    border-radius: 10px;
+    background-clip: padding-box; /* Damit der Verlauf nur den Rand betrifft */
+    overflow-y: scroll;
+    max-height: 100%;
+}
+
+/* Hover-Effekt mit Farbverlauf als Border nur für links und rechts */
+article:hover {
+    transform: scale(1.02); /* Etwas vergrößern für den Effekt */
+    background: linear-gradient(145deg,
+        rgba(0, 255, 255, 0.05),
+        rgba(0, 255, 0, 0.05),
+        rgba(255, 255, 0, 0.05),
+        rgba(255, 0, 150, 0.05)
+    );
+    box-shadow: 
+    0 0 15px rgba(0, 255, 255, 0.75),
+    0 0 20px rgba(0, 255, 0, 0.7),
+    0 0 25px rgba(255, 255, 0, 0.65),
+    0 0 30px rgba(255, 0, 150, 0.6);
+                
+    
+    /* Verlauf nur für den linken und rechten Rand */
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    background-clip: padding-box;
+    border-image: linear-gradient(145deg, #00ffff, #00ff00, #ffff00, #ff69b4) 0.5;
+}
+
+article h1 {
+    font-weight: 600; /* Dicke der Schrift */
+    background: linear-gradient(145deg, #ffff00, #00ffff, #ff69b4, #00ff00); /* Farbverlauf für den Text */
+    -webkit-background-clip: text; /* Damit der Verlauf nur auf den Text angewendet wird */
+    background-clip: text; /* Für den Farbverlauf im Text */
+    color: transparent; /* Textfarbe transparent, damit der Verlauf sichtbar wird */
+    margin: 0px 0px 15px 0px;
+    padding: 0;
+    text-align: center;
+    font-size: clamp(1.1rem, 4vw, 2.2rem);
+}
+
+article h2 {
+    text-align: center;
+    color: crimson;
+    animation: glow-blink 1s infinite;
+    font-size: clamp(0.8rem, 4vw, 1.8rem);
+}
+
+@keyframes glow-blink {
+    0% { text-shadow: 0 0 10px crimson; }
+    50% { text-shadow: 0 0 20px gold; }
+    100% { text-shadow: 0 0 10px crimson; }
+}
+
+article h3 {
+    text-align: center;
+    background: linear-gradient(90deg, #00ffff, #00ff00, #ffff00, #ff69b4, #00ffff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: clamp(0.8rem, 4vw, 1.6rem);
+    margin-top: 1rem;
+    animation: gradientMove 8s linear infinite;
+    background-size: 200% 100%;
+}
+
+/* Keyframes für die Bewegung des Farbverlaufs im Text */
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 0%; /* Startposition */
+    }
+    100% {
+        background-position: 200% 0%; /* Ende der Animation, der Verlauf bewegt sich weiter */
+    }
+}
+
+article p {
+    text-align: center;
+    font-size: 1.25rem;
+}
+
+article a {
+    text-decoration: none;
+    color: crimson;
+    font-weight: 800;
+    cursor: crosshair;
+}

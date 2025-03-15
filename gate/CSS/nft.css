@@ -1,0 +1,53 @@
+#traderbothome {
+    display: flex;
+    flex-wrap: wrap; /* Falls kein Platz mehr ist, wird umgebrochen */
+    gap: 10px;
+    justify-content: flex-start; /* Karten von links nach rechts auffüllen */
+}
+
+.nft {
+    display: flex;
+    align-items: center;
+    width: 47.25%;
+    height: 100px;
+    background: #222;
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nft:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 20px rgba(220, 22, 60, 0.6) !important;
+}
+
+.nft img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.nft video {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.nft-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 10px;
+    max-height: 100%;
+}
+
+.nft-info span {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 2px;
+    overflow-y: scroll;
+}

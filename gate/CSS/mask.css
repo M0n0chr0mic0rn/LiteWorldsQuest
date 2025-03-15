@@ -1,0 +1,42 @@
+/* Login-Form */
+#login-mask {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(34, 34, 34);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    width: 280px;
+    text-align: center;
+    color: white;
+}
+
+/* Eingabefelder */
+#login-mask input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    background: #333;
+    color: white;
+}
+
+/* Button */
+#login-mask button {
+    width: 100%;
+    padding: 5px;
+    background: crimson;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 1.37rem;
+}
+
+#login-mask button:hover {
+    background: darkred;
+}
