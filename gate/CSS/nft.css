@@ -1,21 +1,22 @@
 #traderbothome {
     display: flex;
     flex-wrap: wrap; /* Falls kein Platz mehr ist, wird umgebrochen */
-    gap: 10px;
+    gap: 1dvh;
     justify-content: flex-start; /* Karten von links nach rechts auffüllen */
 }
 
 .nft {
     display: flex;
     align-items: center;
-    width: 47.25%;
-    height: 100px;
+    width: 45%;
+    height: 10dvh;
     background: #222;
     color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    padding: 5px;
+    padding: 0.5dvh;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
 }
 
 .nft:hover {
@@ -24,8 +25,8 @@
 }
 
 .nft img {
-    width: 100px;
-    height: 100px;
+    height: 100%;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 8px;
 }
@@ -46,7 +47,7 @@
 }
 
 .nft-info span {
-    font-size: 1rem;
+    font-size: 1.64dvh;
     font-weight: bold;
     margin-bottom: 2px;
     overflow-y: scroll;

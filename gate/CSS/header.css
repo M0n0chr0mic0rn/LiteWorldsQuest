@@ -76,7 +76,7 @@ header b {
     top: 60%;
     transform: translateY(-50%);
     display: flex;
-    gap: 1rem;
+    gap: 0.5dvw;
     z-index: 1000; /* Sicherstellen, dass es vor allem anderen ist */
 }
 
@@ -89,14 +89,14 @@ header b {
 .nav-item button {
     background: none;
     padding: 0.5rem 1.2rem;
-    font-size: 1rem;
+    font-size: 2.1dvh;
     font-weight: 600;
     color: white;
     cursor: pointer;
     border: none;
     border-radius: 0.5rem;
     transition: background 0.3s ease-in-out;
-    width: 7.3rem;
+    width: 10dvw;
 }
 
 /* Hover-Effekt */
@@ -127,8 +127,8 @@ header b {
     border: none;
     color: white;
     padding: 0.5rem;
-    font-size: 1rem;
-    text-align: left;
+    font-size: 1.6dvh;
+    text-align: center;
     width: 100%;
     cursor: pointer;
     transition: background 0.3s ease-in-out;

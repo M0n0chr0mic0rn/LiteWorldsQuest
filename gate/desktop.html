@@ -13,16 +13,20 @@
     <meta property="og:url" content="https://liteworlds.quest/">
     <meta name="twitter:card" content="summary_large_image">
 
+    <link rel="stylesheet" href="CSS/terminal.css">
     <link rel="stylesheet" href="CSS/header.css">
     <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/timer.css">
     <link rel="stylesheet" href="CSS/guard.css">
     <link rel="stylesheet" href="CSS/mask.css">
+    <link rel="stylesheet" href="CSS/userdata.css">
     <link rel="stylesheet" href="CSS/dexlisting.css">
     <link rel="stylesheet" href="CSS/nft.css">
 
     <script defer src="JavaScript/connection.js"></script>
-    <script defer src="JavaScript/genesis.js"></script>
     <script defer src="JavaScript/masks.js"></script>
+    <script defer src="JavaScript/terminal.js"></script>
+    <script defer src="JavaScript/genesis.js"></script>
     <script defer src="JavaScript/ltcdex.js"></script>
     <script defer src="JavaScript/traderbot.js"></script>
 
@@ -35,8 +39,8 @@
                 <button>Main</button>
                 <div class="dropdown">
                     <button onclick="Menu('Home')">Home</button>
-                    <button onclick="Menu('User')">Dashboard</button>
-                    <button>Login</button>
+                    <button onclick="Menu('Dashboard')">Dashboard</button>
+                    <button onclick="Mask('Login')">Login</button>
                     <button>Signup</button>
                     <button onclick="ClearCache()">Clear Cache</button>                    
                 </div>
@@ -93,7 +97,7 @@
                 </div>
             </article>
             <article>
-                <h1 style="font-size: clamp(1.5rem, 4vw, 3.1415rem);">Hey Chikun!</h1>
+                <h1 style="font-size: clamp(2.5dvh, 4vw, 5dvh);">Hey Chikun!</h1>
                 <!--h2>&darr; READ THIS &darr;</h2-->
                 <p>LiteWorlds is a development Tool<br>This Website is an example useage</p>
                 <p>Created with Linux Ubuntu, 1920x1080 Pixel and Firefox. Display or Performance issues may occure on a other OperatingSystem, Resolution or Browser</p>
@@ -119,23 +123,104 @@
             </article>
         </section>
 
-        <section id="User">
+        <section id="Dashboard">
             <article>
-                <h1>Cooldown's</h1>
+                <h1>Timer</h1>
+                <div id="time-container">
+                    <div class="time-box">
+                        <span class="label">Created:</span>
+                        <div id="createtime" class="flip-clock">--:--:--:--</div>
+                    </div>
+                    <div class="time-box">
+                        <span class="label">Last Action:</span>
+                        <div id="lastaction" class="flip-clock">--:--:--:--</div>
+                    </div>
+                    <div class="time-box">
+                        <span class="label">Kotia Faucet:</span>
+                        <div id="faucetkotia" class="flip-clock">--:--:--:--</div>
+                    </div>
+                    <div class="time-box">
+                        <span class="label">Litecoin Faucet:</span>
+                        <div id="faucetlitecoin" class="flip-clock">--:--:--:--</div>
+                    </div>
+                </div>
             </article>
             <article>
-                <h1>Your Data</h1>
+                <h1>Dashboard</h1>
+                <div class="user-data-container">
+                    <div class="user-data-card">
+                        <div class="data-item">
+                            <span class="user-label">Name:</span>
+                            <span class="value" id="name">Max Mustermann</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="user-label">Language:</span>
+                            <span class="value" id="language">Deutsch</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="user-label">Pairing OmniLite:</span>
+                            <span class="value" id="pairingomnilite">Aktiviert</span>
+                        </div>
+                    </div>
+                </div>                         
             </article>
             <article>
                 <h1>Options</h1>
+                <div class="user-data-container">
+                    <div class="user-data-card">
+                        <h4>Change Password</h4>
+                        <div class="input-group">
+                            <input type="password" id="new-password" class="input-field" placeholder="new password" required>
+                            <input type="password" id="confirm-password" class="input-field" placeholder="repeat password" required>
+                        </div>
+                        <div class="buttons">
+                            <button class="action-button">Change Password</button>
+                        </div>
+                    </div>
+                    <div class="user-data-card">
+                        <h4>Change Telegram</h4>
+                        <div class="input-group">
+                            <input type="text" id="new-telegram" class="input-field-full" placeholder="new telegram" required>
+                        </div>
+                        <div class="buttons">
+                            <button class="action-button">Change Telegram</button>
+                        </div>
+                    </div>
+                    <div class="user-data-card">
+                        <h4>Change Email</h4>
+                        <div class="input-group">
+                            <input type="email" id="new-email" class="input-field-full" placeholder="new email" required>
+                        </div>
+                        <div class="buttons">
+                            <button class="action-button">Change Email</button>
+                        </div>
+                    </div>
+                    <div class="user-data-card">
+                        <h4>Switch Security Method</h4>
+                        <div class="input-group">
+                            <label for="new-security" class="user-label">Choose Method</label>
+                            <select name="new-security" id="new-security" class="select-field">
+                                <option value="telegram">Telegram</option>
+                                <option value="email">Email</option>
+                            </select>
+                        </div>
+                        <div class="buttons">
+                            <button class="action-button">Change Security</button>
+                        </div>
+                    </div>
+                </div>
             </article>
         </section>
 
-        <div id="login-mask">
+        <div id="Mask-login">
             <h2>Login</h2>
             <input type="text" placeholder="Username">
             <input type="password" placeholder="Passwort">
             <button onclick="Login()">Login</button>
+        </div>
+
+        <div id="terminal">
+            <div id="terminal-content"></div>
         </div>
 
         <div id="Guard">

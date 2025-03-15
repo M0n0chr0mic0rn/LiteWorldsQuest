@@ -1,0 +1,46 @@
+#time-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1dvh;
+    background: rgba(34, 34, 34, 0.9);
+    padding: 1dvh;
+    border-radius: 8px;
+    color: white;
+    font-family: monospace;
+}
+
+.time-box {
+    display: flex;
+    align-items: center;
+    gap: 1dvh;
+}
+
+.label {
+    width: 13.37dvw;
+    text-align: right;
+    font-weight: bold;
+    font-size: 1.5dvh;
+}
+
+.flip-clock {
+    display: inline-block;
+    background: #222;
+    padding: 1dvh;
+    font-size: 1.8dvh;
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.5s ease;
+    width: 100%;
+}
+
+.flip-active {
+    display: inline-block;
+    animation: flip 0.2s ease-in-out;
+}
+
+@keyframes flip {
+    0% { transform: rotateX(0); opacity: 1; }
+    50% { transform: rotateX(90deg); opacity: 0; }
+    100% { transform: rotateX(0); opacity: 1; }
+}

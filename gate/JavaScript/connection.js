@@ -30,29 +30,41 @@ class Connect {
 }
 
 class User {
-    url = "https://liteworlds.quest/?method="
+    createtime
+    faucetkotia
+    faucetlitecoin
+    language
+    lastaction
+    name
+    pairingomnilite
 
-    constructor(authkey) {
-        this.authkey = authkey
+    constructor() {
+
     }
 
-    saveUser(user) {
+    save(user) {
+        this.createtime = user.createtime
+        this.faucetkotia = user.faucetkotia
+        this.faucetlitecoin = user.faucetlitecoin
+        this.language = user.language
+        this.lastaction = user.lastaction
         this.name = user.name
+        this.pairingomnilite = user.pairingomnilite
     }
 
-    async get() {
+    async get(authkey, url = "https://liteworlds.quest/?method=") {
         return await (await fetch(url + "get", {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json"
             },
             "body": JSON.stringify({
-                "authkey": this.authkey
+                "authkey": authkey
             })
         })).json()
     }
 
-    async update(key, value) {
+    async update(key, value, url = "https://liteworlds.quest/?method=") {
         return await (await fetch(url + "update", {
             "method": "POST",
             "headers": {

@@ -100,7 +100,7 @@ article h1 {
     margin: 0px 0px 15px 0px;
     padding: 0;
     text-align: center;
-    font-size: clamp(1.1rem, 4vw, 2.2rem);
+    font-size: clamp(2.1dvh, 4vw, 4.2dvh);
 }
 
 article h2 {
@@ -122,8 +122,8 @@ article h3 {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-size: clamp(0.8rem, 4vw, 1.6rem);
-    margin-top: 1rem;
+    font-size: clamp(1.5dvh, 4vw, 3dvh);
+    padding-top: 3.1415dvh;
     animation: gradientMove 8s linear infinite;
     background-size: 200% 100%;
 }
@@ -138,9 +138,16 @@ article h3 {
     }
 }
 
+article h4 {
+    text-align: center;
+    color: crimson;
+    font-size: clamp(0.8dvh, 2dvh, 3dvh);
+    margin: 0.5dvh;
+}
+
 article p {
     text-align: center;
-    font-size: 1.25rem;
+    font-size: 2.1dvh;
 }
 
 article a {

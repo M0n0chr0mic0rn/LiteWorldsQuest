@@ -1,0 +1,34 @@
+#terminal {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 300px;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.84);
+    color: #00ff00;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.73);
+    overflow: hidden;
+    display: none;
+    flex-direction: column-reverse; /* Neueste Einträge oben */
+}
+
+#terminal-content {
+    overflow-y: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Optional: Scrollbar-Styling für Webkit-Browser */
+#terminal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+#terminal-content::-webkit-scrollbar-thumb {
+    background: #00ff00;
+    border-radius: 3px;
+}
