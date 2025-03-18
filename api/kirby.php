@@ -26,12 +26,13 @@ class Kirby
         $this->Key = new Key;
 
         try{
-            $this->Star["response"] = ["inhale"];
+            $this->Star["response"] = [];
             $this->Star["error"] = "";
             $this->Star["bool"] = false;
             $this->Star["ip"] = $_SERVER["REMOTE_ADDR"];
             $this->Star["security"] = [];
             $this->Star["user"] = [];
+            $this->Star["update"] = [];
             $this->Star["action"] = $_GET["method"];
             $this->Star["send"] = [];
         }catch(PDOException $e){
@@ -97,6 +98,7 @@ class Kirby
         unset($this->Star["security"]);
         unset($this->Star["error"]);
         unset($this->Star["ip"]);
+        unset($this->Star["update"]);
     }
 
     public function Spit(){

@@ -1,25 +1,24 @@
-TraderBotHome()
+const dummy = document.getElementById("nft")
+dummy.remove()
+setTimeout(()=>{ TraderBotHome() }, 1500)
+
 function TraderBotHome() {
-    const dummy = document.getElementById("nft")
-    dummy.remove()
     let index = 0
 
-    setTimeout(()=>{
-        _Omnilite.TraderBotGet().then(trader => {
-            trader.forEach(property => {
-                property.tokens.forEach(tokenrange => {
-                    for (let a = tokenrange.tokenstart; a <= tokenrange.tokenstart; a++) {
-                        index++
-                        setTimeout(() => {
-                            _Omnilite.NFTget(property.propertyid, a).then(nft => {
-                                TraderBotPin(dummy, nft[0], property.propertyid)
-                            })
-                        }, parseInt(index) * 50)
-                    }
-                })
+    _Omnilite.TraderBotGet().then(trader => {
+        trader.forEach(property => {
+            property.tokens.forEach(tokenrange => {
+                for (let a = tokenrange.tokenstart; a <= tokenrange.tokenstart; a++) {
+                    index++
+                    setTimeout(() => {
+                        _Omnilite.NFTget(property.propertyid, a).then(nft => {
+                            TraderBotPin(dummy, nft[0], property.propertyid)
+                        })
+                    }, index * 100)
+                }
             })
-        })        
-    }, 1000)
+        })
+    })
 }
 
 function TraderBotPin(dummy, nft, property) {
@@ -55,8 +54,8 @@ function TraderBotPin(dummy, nft, property) {
         NFTcard.id = "nft#" + ID
         document.getElementById("traderbothome").appendChild(NFTcard)
 
-        document.getElementById("nft#" + ID).children[1].children[0].innerHTML = ID + " @ " + desire + "LTC"
-        document.getElementById("nft#" + ID).children[1].children[1].innerHTML = name
+        document.getElementById("nft#" + ID).children[1].children[0].innerHTML = ID
+        document.getElementById("nft#" + ID).children[1].children[1].innerHTML = name + "<br>@ " + desire + "LTC"
 
         const video = document.createElement("video")
         const source = document.createElement("source")

@@ -71,7 +71,7 @@ article {
 /* Hover-Effekt mit Farbverlauf als Border nur für links und rechts */
 article:hover {
     transform: scale(1.02); /* Etwas vergrößern für den Effekt */
-    background: linear-gradient(145deg,
+    background: linear-gradient(290deg,
         rgba(0, 255, 255, 0.05),
         rgba(0, 255, 0, 0.05),
         rgba(255, 255, 0, 0.05),
@@ -88,7 +88,7 @@ article:hover {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     background-clip: padding-box;
-    border-image: linear-gradient(145deg, #00ffff, #00ff00, #ffff00, #ff69b4) 0.5;
+    border-image: linear-gradient(290deg, #00ffff, #00ff00, #ffff00, #ff69b4) 0.5;
 }
 
 article h1 {
@@ -122,10 +122,11 @@ article h3 {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-size: clamp(1.5dvh, 4vw, 3dvh);
+    font-size: clamp(1.4dvh, 3.7vw, 2.8dvh);
     padding-top: 3.1415dvh;
     animation: gradientMove 8s linear infinite;
     background-size: 200% 100%;
+    margin: 0;
 }
 
 /* Keyframes für die Bewegung des Farbverlaufs im Text */

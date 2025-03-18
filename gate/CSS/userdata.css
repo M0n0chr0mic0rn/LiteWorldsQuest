@@ -27,17 +27,19 @@
 
 .user-label {
     font-weight: bold;
-    color: white; /* Gold für die Labels */
+    color: white;
+    font-size: 2.4dvh;
+    font-weight: bold;
 }
 
 .value {
-    font-size: 1.1em;
-    padding-left: 10px; /* Einrückung für die Werte */
-    color: white; /* Etwas hellere Schrift für die Werte */
+    font-size: 2dvh;
+    padding-left: 1dvh;
+    color: white;
 }
 
 .user-data-container .user-data-card {
-    background-color: #333; /* Einfarbige Hintergrundfarbe für die Card */
+    background-color: #333;
 }
 
 
@@ -50,7 +52,7 @@
 
 .input-field {
     padding: 1dvh;
-    font-size: 1dvh;
+    font-size: 1.8dvh;
     border: 1px solid #555;
     border-radius: 5px;
     background-color: #333;
@@ -60,12 +62,12 @@
 
 .input-field:focus {
     outline: none;
-    border-color: crimson;
+    border-color: rgb(0, 255, 0);
 }
 
 .input-field-full {
     padding: 1dvh;
-    font-size: 1dvh;
+    font-size: 1.8dvh;
     border: 1px solid #555;
     border-radius: 5px;
     background-color: #333;
@@ -75,16 +77,16 @@
 
 .input-field-full:focus {
     outline: none;
-    border-color: crimson;
+    border-color: rgb(0, 255, 0);
 }
 
 .action-button {
     background-color: crimson;
-    color: #222;
+    color: whitesmoke;
     padding: 0.5dvh;
     border: none;
     border-radius: 5px;
-    font-size: 1.4em;
+    font-size: 2dvh;
     width: 100%;
     cursor: pointer;
 }
@@ -100,7 +102,7 @@
 
 .select-field {
     padding: 1dvh;
-    font-size: 1.5dvh;
+    font-size: 1.8dvh;
     border: 1px solid #555;
     border-radius: 5px;
     background-color: #333;
@@ -110,5 +112,5 @@
 
 .select-field:focus {
     outline: none;
-    border-color: crimson;
+    border-color: rgb(0, 255, 0);
 }

@@ -57,7 +57,7 @@ function DEXhome() {
                         fill.style.width = element.amountavailable / property.totaltokens *100 + "%"
                     }, 100)
                 })                
-            }, index *50)
+            }, index *100)
 
         }
     })

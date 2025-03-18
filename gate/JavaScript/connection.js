@@ -37,6 +37,7 @@ class User {
     lastaction
     name
     pairingomnilite
+    security
 
     constructor() {
 
@@ -50,6 +51,7 @@ class User {
         this.lastaction = user.lastaction
         this.name = user.name
         this.pairingomnilite = user.pairingomnilite
+        this.security = user.security
     }
 
     async get(authkey, url = "https://liteworlds.quest/?method=") {
@@ -64,14 +66,15 @@ class User {
         })).json()
     }
 
-    async update(key, value, url = "https://liteworlds.quest/?method=") {
-        return await (await fetch(url + "update", {
+    async update(authkey, key, value, url = "https://liteworlds.quest/?method=update") {
+        console.log(authkey, key, value)
+        return await (await fetch(url, {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json"
             },
             "body": JSON.stringify({
-                "authkey": this.authkey,
+                "authkey": authkey,
                 "key": key,
                 "value": value
             })

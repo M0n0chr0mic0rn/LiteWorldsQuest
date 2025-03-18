@@ -15,7 +15,6 @@ class Executer{
             $Kirby->Star["authkey"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["authkey"]);
             if ($Kirby->Star["authkey"] == NULL) $Kirby->Fail("authkey cant be null");
             if (strlen($Kirby->Star["authkey"]) != 420) $Kirby->Fail("Invalid authkey");
-            $Kirby->Response("authkey valid");
         }
 
         switch ($Kirby->Star["action"]) {
@@ -82,6 +81,18 @@ class Executer{
 
                 $Kirby->Response("inputs checked");
                 $Maria->Get($Kirby);
+            break;
+
+            case "update":
+                if (!isset($Post["authkey"])) $Kirby->Fail("parameter \"authkey\" missing");
+                if (!isset($Post["key"])) $Kirby->Fail("parameter \"key\" missing");
+                if (!isset($Post["value"])) $Kirby->Fail("parameter \"value\" missing");
+
+                $Kirby->Star["update"]["key"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["key"]);
+                $Kirby->Star["update"]["value"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["value"]);
+
+                $Kirby->Response("inputs checked");
+                $Maria->Update($Kirby);
             break;
 
             default:

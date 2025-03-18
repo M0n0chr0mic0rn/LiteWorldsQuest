@@ -76,11 +76,12 @@ class Maria {
     }
 
     private static function Security($Kirby){
-        $keyring = $Kirby->Key->Craft2FA($Kirby->Star["action"]);
         $time = time() + self::$TimeWindow;
 
         switch ($Kirby->Star["action"]){
             case "login":
+                $keyring = $Kirby->Key->Craft2FA($Kirby->Star["action"]);
+
                 $Kirby->Star["security"]["link"] = $Kirby->API . "execute&action=login&name=" . $Kirby->Star["user"]["name"] . "&copper=" . $keyring->copper . "&jade=" . $keyring->jade . "&crystal=" . $keyring->crystal;
                 $Kirby->Star["security"]["message"] = "LiteWorlds.Quest Network - Login";
                 $Kirby->Star["security"]["text"] = "You are Login into your Account User: ".$Kirby->Star["user"]["name"];
@@ -96,8 +97,32 @@ class Maria {
                 $stmt->bindParam(":ip", $Kirby->Star["ip"]);
                 $stmt->bindParam(":time", $time);
                 $stmt->execute();
+
                 if ($stmt->rowCount() == 0) $Kirby->Fail("login failed");
                 $Kirby->Response("login prepared");
+            break;
+
+            case "update":
+                $keyring = $Kirby->Key->Craft2FA("_update");
+
+                $Kirby->Star["security"]["link"] = $Kirby->API . "execute&action=update&name=" . $Kirby->Star["user"]["name"] . "&copper=" . $keyring->copper . "&jade=" . $keyring->jade . "&crystal=" . $keyring->crystal;
+                $Kirby->Star["security"]["message"] = "LiteWorlds.Quest Network - Data Update";
+                $Kirby->Star["security"]["text"] = "You are updating your Account User: ".$Kirby->Star["user"]["name"];
+                $Kirby->Star["authkey"] = $Kirby->Key->CraftAuth();
+
+                $stmt = self::$_db->prepare("INSERT INTO _update VALUES (:name, :key, :value, :copper, :jade, :crystal, :ip, :time)");
+                $stmt->bindParam(":name", $Kirby->Star["user"]["name"]);
+                $stmt->bindParam(":key", $Kirby->Star["update"]["key"]);
+                $stmt->bindParam(":value", $Kirby->Star["update"]["value"]);
+                $stmt->bindParam(":copper", $keyring->copper);
+                $stmt->bindParam(":jade", $keyring->jade);
+                $stmt->bindParam(":crystal", $keyring->crystal);
+                $stmt->bindParam(":ip", $Kirby->Star["ip"]);
+                $stmt->bindParam(":time", $time);
+                $stmt->execute();
+
+                if ($stmt->rowCount() == 0) $Kirby->Fail("login failed");
+                $Kirby->Response("update prepared");
             break;
             
             default:
@@ -184,21 +209,6 @@ class Maria {
         $Kirby->Spit();
     }
 
-    public function Get($Kirby, $full = false)
-    {
-        if ($full) $stmt = self::$_db->prepare("SELECT * FROM user WHERE BINARY authkey=:authkey LIMIT 1");
-        else $stmt = self::$_db->prepare("SELECT name, createtime, lastaction, language, faucetkotia, faucetlitecoin, pairingomnilite FROM user WHERE BINARY authkey=:authkey LIMIT 1");
-        $stmt->bindParam(":authkey", $Kirby->Star["authkey"]);
-        $stmt->execute();
-        
-        if ($stmt->rowCount() == 0) $Kirby->Fail("user not found");
-        $Kirby->Star["user"] = $stmt->fetchAll(PDO::FETCH_ASSOC)[0];
-        $Kirby->Response("user found");
-
-        $Kirby->Pretty();
-        $Kirby->Spit();
-    }
-
     public static function Login($Kirby)
     {
         # auf vorhandenen Eintrag prüfen
@@ -219,6 +229,48 @@ class Maria {
 
         self::Security($Kirby);
 
+        $Kirby->Pretty();
+        $Kirby->Spit();
+    }
+
+    public static function Get($Kirby, $full = false)
+    {
+        if ($full) $stmt = self::$_db->prepare("SELECT * FROM user WHERE BINARY authkey=:authkey LIMIT 1");
+        else $stmt = self::$_db->prepare("SELECT name, createtime, lastaction, language, faucetkotia, faucetlitecoin, pairingomnilite, security FROM user WHERE BINARY authkey=:authkey LIMIT 1");
+        $stmt->bindParam(":authkey", $Kirby->Star["authkey"]);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() == 0) $Kirby->Fail("user not found");
+        $Kirby->Star["user"] = $stmt->fetchAll(PDO::FETCH_ASSOC)[0];
+        $Kirby->Response("user found");
+
+        if (!$full) {
+            $Kirby->Pretty();
+            $Kirby->Spit();
+        }
+    }
+
+    public static function Update($Kirby)
+    {
+        switch ($Kirby->Star["update"]["key"]) {
+            case "pass":
+                if (strlen($Kirby->Star["update"]["value"]) != 128) $Kirby->Fail("Password is not sha512 encrypted");
+            break;
+            
+            default:
+                # code...
+            break;
+        }
+        
+        self::Get($Kirby, true);
+        $stmt = self::$_db->prepare("SELECT * FROM _update WHERE BINARY name=:name LIMIT 1");
+        $stmt->bindParam(":name", $Kirby->Star["user"]["name"]);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) $Kirby->Fail("update action already prepared");
+
+        self::Security($Kirby);
+        
         $Kirby->Pretty();
         $Kirby->Spit();
     }

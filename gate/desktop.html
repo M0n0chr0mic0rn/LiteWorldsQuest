@@ -9,7 +9,7 @@
 
     <meta property="og:title" content="LiteWorlds">
     <meta property="og:description" content="Your Gate into the Litecoin Economy">
-    <!--meta property="og:image" content="https://example.com/preview.jpg" -->
+    <meta property="og:image" content="https://liteworlds.quest/preview.png">
     <meta property="og:url" content="https://liteworlds.quest/">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -29,6 +29,8 @@
     <script defer src="JavaScript/genesis.js"></script>
     <script defer src="JavaScript/ltcdex.js"></script>
     <script defer src="JavaScript/traderbot.js"></script>
+
+    <script defer src="JavaScript/dashboard.js"></script>
 
 </head>
 <body>
@@ -127,21 +129,23 @@
             <article>
                 <h1>Timer</h1>
                 <div id="time-container">
-                    <div class="time-box">
-                        <span class="label">Created:</span>
-                        <div id="createtime" class="flip-clock">--:--:--:--</div>
-                    </div>
-                    <div class="time-box">
-                        <span class="label">Last Action:</span>
-                        <div id="lastaction" class="flip-clock">--:--:--:--</div>
-                    </div>
-                    <div class="time-box">
-                        <span class="label">Kotia Faucet:</span>
-                        <div id="faucetkotia" class="flip-clock">--:--:--:--</div>
-                    </div>
-                    <div class="time-box">
-                        <span class="label">Litecoin Faucet:</span>
-                        <div id="faucetlitecoin" class="flip-clock">--:--:--:--</div>
+                    <div id="time-container-card">
+                        <div class="time-box">
+                            <span class="label">Created:</span>
+                            <div id="createtime" class="flip-clock">--:--:--:--</div>
+                        </div>
+                        <div class="time-box">
+                            <span class="label">Last Action:</span>
+                            <div id="lastaction" class="flip-clock">--:--:--:--</div>
+                        </div>
+                        <div class="time-box">
+                            <span class="label">Kotia Faucet:</span>
+                            <div id="faucetkotia" class="flip-clock">--:--:--:--</div>
+                        </div>
+                        <div class="time-box">
+                            <span class="label">Litecoin Faucet:</span>
+                            <div id="faucetlitecoin" class="flip-clock">--:--:--:--</div>
+                        </div>
                     </div>
                 </div>
             </article>
@@ -151,34 +155,36 @@
                     <div class="user-data-card">
                         <div class="data-item">
                             <span class="user-label">Name:</span>
-                            <span class="value" id="name">Max Mustermann</span>
+                            <span class="value" id="name"></span>
                         </div>
                         <div class="data-item">
                             <span class="user-label">Language:</span>
-                            <span class="value" id="language">Deutsch</span>
+                            <span class="value" id="language"></span>
+                        </div>
+                        <div class="data-item">
+                            <span class="user-label">Security Method:</span>
+                            <span class="value" id="security"></span>
                         </div>
                         <div class="data-item">
                             <span class="user-label">Pairing OmniLite:</span>
-                            <span class="value" id="pairingomnilite">Aktiviert</span>
+                            <span class="value" id="pairingomnilite"></span>
                         </div>
                     </div>
                 </div>                         
             </article>
             <article>
-                <h1>Options</h1>
+                <h1>Update Options</h1>
                 <div class="user-data-container">
                     <div class="user-data-card">
-                        <h4>Change Password</h4>
                         <div class="input-group">
                             <input type="password" id="new-password" class="input-field" placeholder="new password" required>
                             <input type="password" id="confirm-password" class="input-field" placeholder="repeat password" required>
                         </div>
                         <div class="buttons">
-                            <button class="action-button">Change Password</button>
+                            <button class="action-button" onclick="changePassword()">Change Password</button>
                         </div>
                     </div>
                     <div class="user-data-card">
-                        <h4>Change Telegram</h4>
                         <div class="input-group">
                             <input type="text" id="new-telegram" class="input-field-full" placeholder="new telegram" required>
                         </div>
@@ -187,7 +193,6 @@
                         </div>
                     </div>
                     <div class="user-data-card">
-                        <h4>Change Email</h4>
                         <div class="input-group">
                             <input type="email" id="new-email" class="input-field-full" placeholder="new email" required>
                         </div>
@@ -196,7 +201,6 @@
                         </div>
                     </div>
                     <div class="user-data-card">
-                        <h4>Switch Security Method</h4>
                         <div class="input-group">
                             <label for="new-security" class="user-label">Choose Method</label>
                             <select name="new-security" id="new-security" class="select-field">
