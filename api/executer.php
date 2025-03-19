@@ -89,7 +89,32 @@ class Executer{
                 if (!isset($Post["value"])) $Kirby->Fail("parameter \"value\" missing");
 
                 $Kirby->Star["update"]["key"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["key"]);
-                $Kirby->Star["update"]["value"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["value"]);
+                switch ($Kirby->Star["update"]["key"]) {
+                    case "pass":
+                        $Kirby->Star["update"]["value"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["value"]);
+                        if (strlen($Kirby->Star["update"]["value"]) != 128) $Kirby->Fail("Password is not sha512 encrypted");
+                    break;
+
+                    case "telegram":
+                        $Kirby->Star["user"]["telegram"] = htmlspecialchars($Post["value"], ENT_QUOTES, "UTF-8");
+                        $Kirby->Telegram->GetID($Kirby);
+                        $Kirby->Star["update"]["value"] = $Kirby->Star["user"]["telegram"];
+                    break;
+
+                    case "email":
+                        if (filter_var($Post["value"], FILTER_VALIDATE_EMAIL)) $Kirby->Star["update"]["value"] = strtolower($Post["value"]);
+                        else $Kirby->Fail("email format not valid");
+                    break;
+
+                    case "security":
+                        $Kirby->Star["update"]["value"] = preg_replace( "/[^a-zA-Z0-9]/", "", $Post["value"]);
+                        if (!($Kirby->Star["update"]["value"] == "telegram" || $Kirby->Star["update"]["value"] == "email")) $Kirby->Fail("Security Method unsupported");
+                    break;
+                    
+                    default:
+                        # code...
+                    break;
+                }          
 
                 $Kirby->Response("inputs checked");
                 $Maria->Update($Kirby);

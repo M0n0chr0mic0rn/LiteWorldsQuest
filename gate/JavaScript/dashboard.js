@@ -11,9 +11,30 @@ async function changePassword() {
         alert("Passwords are not matching")
     }
 }
-function changeEmail() {}
-function changeTelegram() {}
-function switchSecurity() {}
+function changeEmail() {
+    const email = document.getElementById("new-email").value
+
+    _User.update(_AUTHKEY, "email", email).then(update=>{
+        console.log(update)
+        Terminal(update)
+    })
+}
+function changeTelegram() {
+    const telegram = document.getElementById("new-telegram").value.replaceAll("@", "")
+
+    _User.update(_AUTHKEY, "telegram", telegram).then(update=>{
+        console.log(update)
+        Terminal(update)
+    })
+}
+function changeSecurity() {
+    const security = document.getElementById("new-security").value
+
+    _User.update(_AUTHKEY, "security", security).then(update=>{
+        console.log(update)
+        Terminal(update)
+    })
+}
 
 
 function updateTimestamps() {

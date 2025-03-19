@@ -100,6 +100,11 @@ class Maria {
 
                 if ($stmt->rowCount() == 0) $Kirby->Fail("login failed");
                 $Kirby->Response("login prepared");
+
+                switch ($Kirby->Star["user"]["security"]){
+                    case "telegram": $Kirby->Telegram->Send($Kirby); break;
+                    case "email": self::EmailSend($Kirby); break;
+                }
             break;
 
             case "update":
@@ -108,7 +113,6 @@ class Maria {
                 $Kirby->Star["security"]["link"] = $Kirby->API . "execute&action=update&name=" . $Kirby->Star["user"]["name"] . "&copper=" . $keyring->copper . "&jade=" . $keyring->jade . "&crystal=" . $keyring->crystal;
                 $Kirby->Star["security"]["message"] = "LiteWorlds.Quest Network - Data Update";
                 $Kirby->Star["security"]["text"] = "You are updating your Account User: ".$Kirby->Star["user"]["name"];
-                $Kirby->Star["authkey"] = $Kirby->Key->CraftAuth();
 
                 $stmt = self::$_db->prepare("INSERT INTO _update VALUES (:name, :key, :value, :copper, :jade, :crystal, :ip, :time)");
                 $stmt->bindParam(":name", $Kirby->Star["user"]["name"]);
@@ -121,18 +125,32 @@ class Maria {
                 $stmt->bindParam(":time", $time);
                 $stmt->execute();
 
-                if ($stmt->rowCount() == 0) $Kirby->Fail("login failed");
+                if ($stmt->rowCount() == 0) $Kirby->Fail("update failed");
                 $Kirby->Response("update prepared");
+
+                if ($Kirby->Star["update"]["key"] == "pass") {
+                    switch ($Kirby->Star["user"]["security"]){
+                        case "telegram": $Kirby->Telegram->Send($Kirby); break;
+                        case "email": self::EmailSend($Kirby); break;
+                    }
+                }
+                if ($Kirby->Star["update"]["key"] == "telegram" || $Kirby->Star["update"]["key"] == "email") {
+                    switch ($Kirby->Star["update"]["key"]){
+                        case "telegram": $Kirby->Telegram->Send($Kirby); break;
+                        case "email": self::EmailSend($Kirby); break;
+                    }
+                }
+                if ($Kirby->Star["update"]["key"] == "security") {
+                    switch ($Kirby->Star["update"]["value"]){
+                        case "telegram": $Kirby->Telegram->Send($Kirby); break;
+                        case "email": self::EmailSend($Kirby); break;
+                    }
+                }
             break;
             
             default:
                 # code...
             break;
-        }
-
-        switch ($Kirby->Star["user"]["security"]){
-            case "telegram": $Kirby->Telegram->Send($Kirby); break;
-            case "email": self::EmailSend($Kirby); break;
         }
     }
 
@@ -251,17 +269,7 @@ class Maria {
     }
 
     public static function Update($Kirby)
-    {
-        switch ($Kirby->Star["update"]["key"]) {
-            case "pass":
-                if (strlen($Kirby->Star["update"]["value"]) != 128) $Kirby->Fail("Password is not sha512 encrypted");
-            break;
-            
-            default:
-                # code...
-            break;
-        }
-        
+    {        
         self::Get($Kirby, true);
         $stmt = self::$_db->prepare("SELECT * FROM _update WHERE BINARY name=:name LIMIT 1");
         $stmt->bindParam(":name", $Kirby->Star["user"]["name"]);
