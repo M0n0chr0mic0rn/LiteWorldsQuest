@@ -32,6 +32,7 @@ class Kirby
             $this->Star["ip"] = $_SERVER["REMOTE_ADDR"];
             $this->Star["security"] = [];
             $this->Star["user"] = [];
+            $this->Star["litecoin"] = [];
             $this->Star["update"] = [];
             $this->Star["action"] = $_GET["method"];
             $this->Star["send"] = [];
@@ -105,5 +106,53 @@ class Kirby
         $this->Star["bool"] = true;
         echo json_encode($this->Star, JSON_PRETTY_PRINT);
         exit;
+    }
+
+    public function Eat() {
+        $this->Star["response"] = [];
+    }
+
+    public function LTCget() {
+        $r = self::Litecoin("listwallets", [], $this->Star["user"]["name"]);
+        $r1 = json_decode($r);
+        $loaded = false;
+
+        foreach ($r1 as $key => $value)
+        {
+            if ($value == $this->Star["user"]["name"]) $loaded = true;
+        }
+
+        if (!$loaded)
+        {
+            if (isset($this->Star["user"]["name"]))
+            {
+                $h1 = json_decode(self::Litecoin("createwallet", [$this->Star["user"]["name"]]));
+                if (!isset($h1->name)) self::Litecoin("loadwallet", [$this->Star["user"]["name"]]);
+            }
+            else self::Fail("unknown User");
+        }
+
+        $labels = json_decode(self::Litecoin("listlabels", [], $this->Star["user"]["name"]));
+        self::Response("scanning Labels");
+
+        foreach ($labels as $key => $label)
+        {
+            if ($key == 0) self::Response("scanning Addresses");
+            $this->Star["litecoin"][$label] = [];
+            $addresses = (array)json_decode(self::Litecoin("getaddressesbylabel", [$label], $this->Star["user"]["name"]));
+
+            foreach ($addresses as $key1 => $address)
+            {
+                $this->Star["litecoin"][$label][$key1] = [];
+                $utxos = (array)json_decode(self::Litecoin("listunspent", [0, 999999999, [$key1]], $this->Star["user"]["name"]));
+
+                foreach ($utxos as $key2 => $utxo)
+                {
+                    array_push($this->Star["litecoin"][$label][$key1], array("txid"=>$utxo->txid, "vout"=>$utxo->vout, "amount"=>number_format($utxo->amount, 8, ".", ""), "confirmations"=>$utxo->confirmations));
+                }
+            }
+        }
+
+        self::Response("Wallet loaded");
     }
 }

@@ -50,7 +50,7 @@ else
 
     # Zugang erlauben von ? in unserem Fall alle
     header("Access-Control-Allow-Origin:*");
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+    header("Access-Control-Allow-Methods: GET, POST");
     header("Access-Control-Allow-Headers: Content-Type");
 
     # aufruf der Klassen
@@ -153,7 +153,7 @@ else
 
         # JSON-Daten kodieren
         $json_data = json_encode($request_data);
-        //var_dump($json_data);
+        var_dump($json_data);
 
         # HTTP-Kontext-Optionen für die Anfrage
         $options = array(

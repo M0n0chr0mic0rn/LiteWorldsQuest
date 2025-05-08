@@ -30,12 +30,12 @@ function Terminal(logData) {
     let time_left = 180
 
     if (logData.bool) {
-        logData.response.push("Request successful")
-        logData.response.push("Connection closed")
+        logData.response.push("# Request successful")
+        logData.response.push("## Connection closed")
 
         switch (logData.action) {
             case "get":
-                logData.response.push("You are logged in")
+                logData.response.push("### You are logged in")
             break
             case "login":
                 Signature = true
@@ -48,7 +48,7 @@ function Terminal(logData) {
     }
 
     if (Signature) {
-        logData.response.push("Waiting for Signature")
+        logData.response.push("## Waiting for Signature")
     }
 
     // Jede Response-Zeile separat hinzufügen
@@ -60,7 +60,7 @@ function Terminal(logData) {
         if (logData.hasOwnProperty("error")) {
             const entry = logData.error
             const newLog = document.createElement("div")
-            newLog.textContent = `error > `
+            newLog.textContent = `error ! `
             newLog.style.color = "red"
             newLog.style.paddingLeft = "10px"
             terminalContent.appendChild(newLog)
@@ -97,7 +97,7 @@ function Terminal(logData) {
                     setTimeout(() => {
                         currentInterval = setInterval(() => {
                             time_left--
-                            newLog.textContent = "> Waiting for Signature " + time_left
+                            newLog.textContent = "> ### Waiting for Signature " + time_left
 
                             if (time_left <= 0) {
                                 clearInterval(currentInterval)

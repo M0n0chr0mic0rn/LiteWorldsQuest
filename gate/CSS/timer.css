@@ -1,32 +1,7 @@
-#time-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2dvh;
-}
-
-#time-container-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1dvh;
-    background: rgba(34, 34, 34, 0.9);
-    padding: 1dvh;
-    border-radius: 8px;
-    color: white;
-    font-family: monospace;
-}
-
 .time-box {
     display: flex;
-    align-items: center;
-    gap: 1dvh;
-}
-
-.label {
-    width: 21dvw;
-    text-align: right;
-    font-weight: bold;
-    font-size: 2.1dvh;
+    flex-direction: column;
+    gap: 0.25dvh;
 }
 
 .flip-clock {
@@ -38,7 +13,8 @@
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     transition: transform 0.5s ease;
-    width: 100%;
+    width: calc(100% - 2dvh);
+    margin-bottom: 1.5dvh;
 }
 
 .flip-active {

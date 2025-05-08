@@ -1,6 +1,8 @@
 const _IPFS = "https://ipfs.io/ipfs/"
 const _Ordinal = "https://ordinalslite.com/content/"
 
+const _LitecoinSpaceTX = "https://litecoinspace.org/tx/"
+
 const _Main = document.getElementById("Main")
 const _Home = document.getElementById("Home")
 const _Dashboard = document.getElementById("Dashboard")
@@ -9,7 +11,10 @@ const _Guard = document.getElementById("Guard")
 
 const _Connect = new Connect()
 const _User = new User()
+const _Litecoin = new Litecoin()
 const _Omnilite = new Omnilite()
+
+const _Wallet = []
 
 Menu("Home")
 MenuDisplay(false)
@@ -19,8 +24,8 @@ if (_AUTHKEY != null) {
     _User.get(_AUTHKEY).then(response=>{
         if (response.bool) {
             _User.save(response.user)
+            
             Menu("Dashboard")
-            console.log(_User)
             updateUserData()
             MenuDisplay(true)
             Terminal(response)
@@ -28,9 +33,31 @@ if (_AUTHKEY != null) {
     })
 }
 
+async function Login() {
+    const name = document.getElementById("login-name").value
+    const pass = await sha512(document.getElementById("login-pass").value)
+
+    _Connect.login(name, pass).then(login => {
+        Terminal(login)
+    })
+}
+
+function copyAuthKey() {
+    navigator.clipboard.writeText(_AUTHKEY)
+}
+
 function Menu(point) {
     for (let a = 0; a < _Main.children.length; a++) _Main.children[a].style.display = "none"
     document.getElementById(point).style.display = "flex"
+
+    switch (point) {
+        case "Wallet-cltc":
+                LTCgenesis()
+            break;
+    
+        default:
+            break;
+    }
 }
 
 function MenuDisplay(logged) {
@@ -39,7 +66,7 @@ function MenuDisplay(logged) {
         keymap = [[
             true, true, false, false, true
         ],[
-            true, true, true
+            true, true, true, true
         ],[
             true, true, true, true
         ],[
@@ -49,7 +76,7 @@ function MenuDisplay(logged) {
         keymap = [[
             true, false, true, true, true
         ],[
-            false, false, false
+            false, false, false, false
         ],[
             false, false, false, false
         ],[

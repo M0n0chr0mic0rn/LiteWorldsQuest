@@ -1,9 +1,9 @@
 <?php
-require_once("../api/maria.php");
+require_once("maria.php");
 
 class Executer{
-    private static $Post;
-    private static $Maria;
+    //private static $Post;
+    //private static $Maria;
 
     public function __construct($Kirby){
         $Post = json_decode(file_get_contents("php://input"), true);
@@ -83,7 +83,7 @@ class Executer{
                 $Maria->Get($Kirby);
             break;
 
-            case "update":
+            case "update": # Done
                 if (!isset($Post["authkey"])) $Kirby->Fail("parameter \"authkey\" missing");
                 if (!isset($Post["key"])) $Kirby->Fail("parameter \"key\" missing");
                 if (!isset($Post["value"])) $Kirby->Fail("parameter \"value\" missing");
@@ -118,6 +118,18 @@ class Executer{
 
                 $Kirby->Response("inputs checked");
                 $Maria->Update($Kirby);
+            break;
+
+            # LITECOIN
+            case "ltc-get": # Done
+                if (!isset($Post["authkey"])) $Kirby->Fail("parameter \"authkey\" missing");
+
+                $Maria->get($Kirby, true);
+                $Kirby->Eat();
+                $Kirby->Response("inputs checked");
+                $Kirby->LTCget($Kirby);
+                $Kirby->Pretty();
+                $Kirby->Spit();
             break;
 
             default:

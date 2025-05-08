@@ -2,7 +2,7 @@
 /* Header-Styles */
 header {
     width: 100dvw; /* Volle Breite */
-    height: 5rem; /* Feste Höhe */
+    height: 8dvh; /* Feste Höhe */
     background: #111; /* Dunkler Hintergrund */
     color: white;
     display: flex;
@@ -21,8 +21,8 @@ header::after {
     content: "";
     position: absolute;
     top: 0;
-    left: -50%;
-    width: 50%;
+    left: -10%;
+    width: 10%;
     height: 100%;
     background: linear-gradient(90deg, 
         rgba(255, 255, 255, 0) 0%, 
@@ -33,7 +33,7 @@ header::after {
 
 @keyframes lightSweep {
     0% {
-        left: -50%;
+        left: -10%;
     }
     100% {
         left: 100%;
@@ -43,9 +43,9 @@ header::after {
 /* Header Name Styling mit kontinuierlich fließendem Farbverlauf */
 header b {
     position: absolute;
-    left: 1.37rem;
-    margin-top: 1rem;
-    font-size: clamp(2.4rem, 4vw, 3.1415rem);
+    left: 3.1415dvh;
+    padding-top: 1.6dvh;
+    font-size: clamp(3dvh, 4vw, 6dvh);
     font-weight: bold;
     font-family: monospace;
     background: linear-gradient(90deg, #00ffff, #00ff00, #ffff00, #ff69b4, #00ffff);

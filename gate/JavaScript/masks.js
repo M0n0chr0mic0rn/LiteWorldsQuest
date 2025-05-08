@@ -10,12 +10,3 @@ function Mask(action) {
             break;
     }
 }
-
-async function Login() {
-    const name = document.getElementById("Mask-login").children[1].value
-    const pass = await sha512(document.getElementById("Mask-login").children[2].value)
-
-    _Connect.login(name, pass).then(login => {
-        Terminal(login)
-    })
-}

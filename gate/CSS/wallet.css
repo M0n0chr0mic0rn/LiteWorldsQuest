@@ -1,0 +1,26 @@
+.nav-label {
+    font-weight: bold;
+    color: whitesmoke;
+    font-size: 1.1em;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8dvh;
+    width: 100%;
+}
+
+.button {
+    background-color: crimson;
+    color: whitesmoke;
+    padding: 0.5dvh;
+    border: none;
+    border-radius: 5px;
+    font-size: 2dvh;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: darkred;
+}

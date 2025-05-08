@@ -237,6 +237,18 @@ switch ($_GET["method"])
         $LITECOIN->TokenRequestPurchase($RETURN);
     break;
 
+    case "ltcomni-get-balance-address":
+        if (!isset($_GET["authkey"])) Fail($RETURN, "parameter \"authkey\" missing");
+        if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing");
+
+        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
+
+        echo $address;
+
+        $USER->get($RETURN);
+        echo Node($RETURN, "omni_getwalletaddressbalances", [], $RETURN->user["name"]);
+    break;
+
     # LITECOIN Public
     case "ltc-help":
         header("Content-type: text/plain; charset=utf-8");
@@ -262,14 +274,6 @@ switch ($_GET["method"])
         $token = intval($_GET["token"]);
 
         echo Node($RETURN, "omni_getnonfungibletokendata", [$property, $token]);
-    break;
-
-    case "ltcomni-get-balance-address":
-        if (!isset($_GET["address"])) Fail($RETURN, "parameter \"address\" missing");
-
-        $address = preg_replace( "/[^a-zA-Z0-9]/", "", $_GET["address"]);
-
-        echo Node($RETURN, "omni_getallbalancesforaddress", [$address]);
     break;
 
     case "ltcomni-get-balance-token":

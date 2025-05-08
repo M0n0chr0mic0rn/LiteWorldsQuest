@@ -67,7 +67,6 @@ class User {
     }
 
     async update(authkey, key, value, url = "https://liteworlds.quest/?method=update") {
-        console.log(authkey, key, value)
         return await (await fetch(url, {
             "method": "POST",
             "headers": {
@@ -82,8 +81,27 @@ class User {
     }
 }
 
+class Litecoin {
+    async get(authkey, url = "https://liteworlds.quest/?method=ltc-get") {
+        return await (await fetch(url, {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": JSON.stringify({
+                "authkey": authkey
+            })
+        })).json()
+    }
+}
+
 class Omnilite {
     url = "https://liteworlds.quest/?method="
+
+    async AdrGet(address) {
+        console.log(this.url + "ltcomni-get-balance-address&address=" + address)
+        return await (await fetch(this.url + "ltcomni-get-balance-address&address=" + address)).text()
+    }
 
     async PropertyGet(id) {
         return await (await fetch(this.url + "ltc-property-get&property=" + id)).json()

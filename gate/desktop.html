@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>LiteWorlds</title>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>LiteWorlds</title>
-
     <meta property="og:title" content="LiteWorlds">
-    <meta property="og:description" content="Your Gate into the Litecoin Economy">
-    <meta property="og:image" content="https://liteworlds.quest/preview.png">
+    <meta property="og:description" content="Your Gate into the Litecoin Omnilite Economy">
+    <meta property="og:image" content="https://ipfs.io/ipfs/bafybeiasex4pd32scwn7lofmx7guwe3evobflrpzhzornjvjtwfy5q4n6m">
     <meta property="og:url" content="https://liteworlds.quest/">
     <meta name="twitter:card" content="summary_large_image">
 
     <link rel="stylesheet" href="CSS/terminal.css">
     <link rel="stylesheet" href="CSS/header.css">
     <link rel="stylesheet" href="CSS/style.css">
+
+    <link rel="stylesheet" href="CSS/card.css">
+    <link rel="stylesheet" href="CSS/token.css">
+    <link rel="stylesheet" href="CSS/userdata.css">
     <link rel="stylesheet" href="CSS/timer.css">
+
     <link rel="stylesheet" href="CSS/guard.css">
     <link rel="stylesheet" href="CSS/mask.css">
-    <link rel="stylesheet" href="CSS/userdata.css">
-    <link rel="stylesheet" href="CSS/dexlisting.css">
-    <link rel="stylesheet" href="CSS/nft.css">
+    <link rel="stylesheet" href="CSS/wallet.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.js"></script> <!-- Lesen -->
+    <script src="https://unpkg.com/@zxing/browser@latest"></script> <!-- Schreiben -->
 
     <script defer src="JavaScript/connection.js"></script>
     <script defer src="JavaScript/masks.js"></script>
@@ -31,6 +37,7 @@
     <script defer src="JavaScript/traderbot.js"></script>
 
     <script defer src="JavaScript/dashboard.js"></script>
+    <script defer src="JavaScript/walletcltc.js"></script>
 
 </head>
 <body>
@@ -50,7 +57,8 @@
             <div class="nav-item">
                 <button>Litecoin</button>
                 <div class="dropdown">
-                    <button>Wallet</button>
+                    <button onclick="Menu('Wallet-cltc')">custodial Wallet</button>
+                    <button>self-custody Wallet</button>
                     <button>P2P Trade</button>
                     <button>OmniliteDEX</button>
                 </div>
@@ -81,18 +89,16 @@
         <section id="Home">
             <article>
                 <h1>Omnilite DEX</h1>
-                <div id="ltcdexhome">
-                    <div class="listing">
+                <div class="card-container">
+                    <div class="card-token">
                         <img src="favicon.ico">
-                        <div class="info">
-                            <div class="header">
-                                <span>ID: <span>12345</span></span>
+                        <div class="token-info">
+                            <div class="token-header">
+                                <span>ID: 12345</span>
+                                <span>Name: Awesome Item</span>
                             </div>
-                            <div>
-                                <span>Name: <span>Awesome Item</span></span>
-                            </div>
-                            <div class="bar-container">
-                                <div class="fill"></div>
+                            <div class="token-bar-container">
+                                <div class="token-bar-fill"></div>
                             </div>
                         </div>
                     </div>
@@ -103,22 +109,22 @@
                 <!--h2>&darr; READ THIS &darr;</h2-->
                 <p>LiteWorlds is a development Tool<br>This Website is an example useage</p>
                 <p>Created with Linux Ubuntu, 1920x1080 Pixel and Firefox. Display or Performance issues may occure on a other OperatingSystem, Resolution or Browser</p>
-                <p>For more Informations you can visit our <a href="https://discord.com/invite/H3RDCkU35C" target="_blank">Discord</a> or read the <a href="https://github.com/M0n0chr0mic0rn/LiteWorldsQuest" target="_blank">GitHub Repository</a></p>
+                <p><a href="legal.html" target="_blank">Legal Disclaimer</a> -- <a href="https://github.com/M0n0chr0mic0rn/LiteWorldsQuest" target="_blank">GitHub Repository</a> -- <a href="https://discord.com/invite/H3RDCkU35C" target="_blank">Discord</a></p>
                 <p>LiteWorlds offers a custodial Wallet which is created as<br>Payment-Processor. Not as store of value over time!</p>
                 <p>A self custody version will follow soon<br>We work on a - connect your local node - option aswell</p>
-                <p>Focusing on <a href="https://litecoin.com" target="_blank">Litecoin</a> which is a commodity, we also using <a href="https://kotia.cash" target="_blank">KotiaCash</a> as PlayGround for new stuff</p>
+                <p>Focusing on <a href="https://litecoin.com" target="_blank">Litecoin</a> which is a commodity, we also using <a href="https://kotia.cash" target="_blank">Kotia</a> as PlayGround for new stuff</p>
                 <p>There is no exchange between Litecoin and KotiaCash offered on LiteWorlds. Working exchange options between Litecoin and Litecoin-Assets (Omnilite/Ordinals/Runes) are for illustrative purposes only</p>
-                <h3>Welcome to the Litecoin Rainbow Road<br>Made by Monochromicorn @tbuuol</h3>
+                <h3>Welcome to the Litecoin Rainbow Road<br>Made by @tbuuol</h3>
             </article>
             <article>
                 <h1>NFT Vendor</h1>
-                <div id="traderbothome">
-                    <div id="nft" class="nft">
-                        <img src="favicon.ico" alt="No Image">
-                        <div class="nft-info">
+                <div class="card-container">
+                    <div class="card-token">
+                        <div class="token-info">
                             <span>ID</span>
                             <span>Name</span>
                         </div>
+                        <img src="favicon.ico" alt="No Image">
                     </div>
                 </div>
             </div>
@@ -128,22 +134,22 @@
         <section id="Dashboard">
             <article>
                 <h1>Timer</h1>
-                <div id="time-container">
-                    <div id="time-container-card">
+                <div class="card-container">
+                    <div class="card">
                         <div class="time-box">
-                            <span class="label">Created:</span>
+                            <span class="card-key">Created:</span><br>
                             <div id="createtime" class="flip-clock">--:--:--:--</div>
                         </div>
                         <div class="time-box">
-                            <span class="label">Last Action:</span>
+                            <span class="card-key">Last Action:</span><br>
                             <div id="lastaction" class="flip-clock">--:--:--:--</div>
                         </div>
                         <div class="time-box">
-                            <span class="label">Kotia Faucet:</span>
+                            <span class="card-key">Kotia Faucet:</span><br>
                             <div id="faucetkotia" class="flip-clock">--:--:--:--</div>
                         </div>
                         <div class="time-box">
-                            <span class="label">Litecoin Faucet:</span>
+                            <span class="card-key">Litecoin Faucet:</span><br>
                             <div id="faucetlitecoin" class="flip-clock">--:--:--:--</div>
                         </div>
                     </div>
@@ -151,75 +157,100 @@
             </article>
             <article>
                 <h1>Dashboard</h1>
-                <div class="user-data-container">
-                    <div class="user-data-card">
-                        <div class="data-item">
-                            <span class="user-label">Name:</span>
-                            <span class="value" id="name"></span>
+                <div class="card-container">
+                    <div class="card">
+                        <div class="card-item">
+                            <span class="card-key">Name:</span>
+                            <span class="card-value" id="name"></span>
                         </div>
-                        <div class="data-item">
-                            <span class="user-label">Language:</span>
-                            <span class="value" id="language"></span>
+                        <div class="card-item">
+                            <span class="card-key">Language:</span>
+                            <span class="card-value" id="language"></span>
                         </div>
-                        <div class="data-item">
-                            <span class="user-label">Security Method:</span>
-                            <span class="value" id="security"></span>
+                        <div class="card-item">
+                            <span class="card-key">Security Method:</span>
+                            <span class="card-value" id="security"></span>
                         </div>
-                        <div class="data-item">
-                            <span class="user-label">Pairing OmniLite:</span>
-                            <span class="value" id="pairingomnilite"></span>
+                        <div class="card-item">
+                            <span class="card-key">Pairing OmniLite:</span>
+                            <span class="card-value" id="pairingomnilite"></span>
                         </div>
                     </div>
                 </div>                         
             </article>
             <article>
                 <h1>Update Options</h1>
-                <div class="user-data-container">
-                    <div class="user-data-card">
+                <div class="card-container">
+                    <div class="card">
                         <div class="input-group">
                             <input type="password" id="new-password" class="input-field" placeholder="new password" required>
                             <input type="password" id="confirm-password" class="input-field" placeholder="repeat password" required>
                         </div>
-                        <div class="buttons">
-                            <button class="action-button" onclick="changePassword()">Change Password</button>
-                        </div>
+                        <button class="button" onclick="changePassword()">Change Password</button>
                     </div>
-                    <div class="user-data-card">
-                        <div class="input-group">
-                            <input type="text" id="new-telegram" class="input-field-full" placeholder="new telegram" required>
-                        </div>
-                        <div class="buttons">
-                            <button class="action-button" onclick="changeTelegram()">Change Telegram</button>
-                        </div>
+                    <div class="card">
+                        <input type="text" id="new-telegram" class="input-field-full" placeholder="new telegram" required>
+                        <button class="button" onclick="changeTelegram()">Change Telegram</button>
                     </div>
-                    <div class="user-data-card">
-                        <div class="input-group">
-                            <input type="email" id="new-email" class="input-field-full" placeholder="new email" required>
-                        </div>
-                        <div class="buttons">
-                            <button class="action-button" onclick="changeEmail()">Change Email</button>
-                        </div>
+                    <div class="card">
+                        <input type="email" id="new-email" class="input-field-full" placeholder="new email" required>
+                        <button class="button" onclick="changeEmail()">Change Email</button>
                     </div>
-                    <div class="user-data-card">
-                        <div class="input-group">
-                            <label for="new-security" class="user-label">Choose Method</label>
-                            <select name="new-security" id="new-security" class="select-field">
-                                <option value="telegram">Telegram</option>
-                                <option value="email">Email</option>
-                            </select>
-                        </div>
-                        <div class="buttons">
-                            <button class="action-button" onclick="changeSecurity()">Change Security</button>
-                        </div>
+                    <div class="card">
+                        <select id="new-security">
+                            <option value="telegram">Telegram</option>
+                            <option value="email">Email</option>
+                        </select>
+                        <button class="button" onclick="changeSecurity()">Change Security</button>
+                    </div>
+                    <div class="card">
+                        <button class="button" onclick="copyAuthKey()">Copy AuthKey</button>
                     </div>
                 </div>
             </article>
         </section>
 
+        <section id="Wallet-cltc">
+            <article>
+                <h1>Omnilite</h1>
+            </article>
+            <article>
+                <h1>custodial Wallet</h1>
+                <div class="card-container">
+                    <div class="card">
+                        <label class="card-key">Label</label>
+                        <select>
+                            <option value="litecoin">Litecoin</option>
+                            <option value="omnilite">OmniLite</option>
+                        </select>
+
+                        <label class="card-key">Address</label>
+                        <select>
+                            <option value="addr1">Adresse 1</option>
+                            <option value="addr2">Adresse 2</option>
+                        </select>
+
+                        <div style="text-align: center">
+                            <button class="button">Send</button>
+                            <button class="button">History</button>
+                            <button class="button">QR-Code</button>
+                            <button class="button">Merge UTXOs</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        
+                    </div>
+                </div>
+            </article>
+            <article>
+                <h1>Ordinals</h1>
+            </article>
+        </section>
+
         <div id="Mask-login">
             <h2>Login</h2>
-            <input type="text" placeholder="Username">
-            <input type="password" placeholder="Passwort">
+            <input id="login-name" type="text" placeholder="Username">
+            <input id="login-pass" type="password" placeholder="Passwort">
             <button onclick="Login()">Login</button>
         </div>
 
@@ -228,7 +259,7 @@
         </div>
 
         <div id="Guard">
-            <div class="campfire"></div>
+            <!--div class="campfire"></div!-->
         </div>
     </main>
 </body>

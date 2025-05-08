@@ -8,7 +8,7 @@
 .nft {
     display: flex;
     align-items: center;
-    width: 45%;
+    width: 47%;
     height: 10dvh;
     background: #222;
     color: white;
@@ -32,10 +32,27 @@
 }
 
 .nft video {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
     border-radius: 8px;
+}
+
+.nft-playpause {
+    position: absolute;
+    height: 5dvh;
+    aspect-ratio: 1/1;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    border: 0px;
+    border-radius: 1dvh;
+    background: linear-gradient(145deg, #ffff00, #00ffff, #ff69b4, #00ff00);
+    clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+}
+
+.nft-playpause:hover {
+    opacity: 1 !important;
 }
 
 .nft-info {
